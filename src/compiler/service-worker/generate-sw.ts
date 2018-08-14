@@ -16,6 +16,8 @@ async function generateServiceWorker(config: d.Config, compilerCtx: d.CompilerCt
     return;
   }
 
+  await config.sys.lazyRequire.ensure(config.logger, config.rootDir, ['workbox-build']);
+
   if (hasSrcConfig(outputTarget)) {
     await Promise.all([
       copyLib(config, buildCtx, outputTarget),

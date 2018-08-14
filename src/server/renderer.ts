@@ -11,7 +11,7 @@ export class Renderer {
   private ctx: d.CompilerCtx;
   private outputTarget: d.OutputTargetWww;
   private cmpRegistry: d.ComponentRegistry;
-
+  private hasRequiredPackages = false;
 
   constructor(public config: d.Config, registry?: d.ComponentRegistry, ctx?: d.CompilerCtx, outputTarget?: d.OutputTargetWww) {
     this.config = validateConfig(config);
@@ -36,6 +36,12 @@ export class Renderer {
   }
 
   async hydrate(hydrateOpts: d.HydrateOptions) {
+    if (!this.hasRequiredPackages) {
+      // ensure we've got the require packages installed
+      await this.config.sys.lazyRequire.ensure(this.config.logger, this.config.rootDir, ['jsdom']);
+      this.hasRequiredPackages = true;
+    }
+
     let hydrateResults: d.HydrateResults;
 
     // kick off hydrated, which is an async opertion

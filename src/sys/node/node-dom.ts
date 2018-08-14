@@ -1,17 +1,17 @@
 import * as d from '../../declarations';
 
 
-export function createDom(): d.CreateDom {
+export function createDom(lazyRequire: d.LazyRequire) {
   let dom: any = null;
 
-  return {
+  const createDom: d.CreateDom = {
 
     parse(opts: d.OutputTargetHydrate) {
       if (dom) {
         dom.window.close();
       }
 
-      const jsdom = require('jsdom');
+      const jsdom = lazyRequire.require('jsdom');
       const jsdomOptions: any = {
         url: opts.url,
         referrer: opts.referrer,
@@ -41,13 +41,14 @@ export function createDom(): d.CreateDom {
 
   };
 
+  return createDom;
 }
 
 
-function polyfillJsDom(window: any) {
+function polyfillJsDom(win: any) {
 
-  if (!window.Element.prototype.closest) {
-    window.Element.prototype.closest = function (selector: string) {
+  if (!win.Element.prototype.closest) {
+    win.Element.prototype.closest = function (selector: string) {
       let el = this;
       while (el) {
           if (el.matches(selector)) {
