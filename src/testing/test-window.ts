@@ -1,212 +1,111 @@
 import * as d from '../declarations';
-import { fillCmpMetaFromConstructor } from '../util/cmp-meta';
-import { mockStencilSystem } from './mocks';
-import { Renderer } from '../server';
-import { TestWindowLogger } from './test-window-logger';
-import { validateConfig } from '../compiler/config/validate-config';
+import * as puppeteer from 'puppeteer';
 
 
-// weakmaps to keep these actually private
-const loggers = new WeakMap<TestWindow, TestWindowLogger>();
-const platforms = new WeakMap<TestWindow, d.PlatformApi>();
+declare const global: d.JestEnvironmentGlobal;
 
-
-// Extern type definition of TestWindow to look like a subclass of Window
-// while at runtime, it's not.
-export declare interface TestWindow extends Window {}
 
 export class TestWindow {
+  private hasLoaded = false;
 
-  async load(opts: TestWindowLoadOptions) {
-    if (this.window) {
-      throw new Error(`TestWindow load() cannot be called more than once on the same instance`);
+  window: Window = null;
+  document: Document = null;
+  history: History = null;
+  location: Location = null;
+  navigator: Navigator = null;
+  CustomEvent: typeof CustomEvent = null;
+  Event: typeof Event = null;
+  URL: typeof URL = null;
+
+  async load(opts: d.TestWindowLoadOptions) {
+    validateTestWindowLoadOptions(this.hasLoaded, opts);
+    this.hasLoaded = true;
+
+    if (typeof opts.html === 'string') {
+      const testPage = await global.createTestPage();
+
+      await loadHtml(testPage.page, opts);
+
+      await initTestWindowProperties(this, testPage, testPage.page);
+
+      this.content = () => (testPage.page as puppeteer.Page).content();
     }
-
-    // validate we've got good options
-    validateTestWindowLoadOptions(opts);
-
-    // only create one dom per TestWindow
-    const sys = mockStencilSystem();
-    const dom = sys.createDom();
-
-    // all subsequent calls reuse the same DOM for this test window
-    // for example, the hydrateHtml fn in Renderer end up using this
-    // same one rather than creating a new dom entirely
-    sys.createDom = () => dom;
-
-    const logger = new TestWindowLogger();
-    loggers.set(this, logger);
-
-    const config = validateConfig({
-      sys: sys,
-      logger: logger,
-      rootDir: '/',
-      devMode: true,
-      _isTesting: true
-    } as d.Config);
-
-    let elm: any = null;
-
-    try {
-      const compilerCtx: d.CompilerCtx = {};
-      const registry: d.ComponentRegistry = {};
-
-      opts.components.forEach((testCmp: d.ComponentConstructor) => {
-        if (testCmp) {
-          const cmpMeta = fillCmpMetaFromConstructor(testCmp, {});
-          registry[cmpMeta.tagNameMeta] = cmpMeta;
-          cmpMeta.componentConstructor = testCmp;
-        }
-      });
-
-      const renderer = new Renderer(config, registry, compilerCtx);
-
-      const hydrateOpts: d.HydrateOptions = {
-        html: opts.html,
-        url: opts.url,
-        userAgent: opts.userAgent,
-        cookie: opts.cookie,
-        direction: opts.direction,
-        language: opts.language,
-        serializeHtml: false,
-        destroyDom: false,
-        isPrerender: false,
-        inlineLoaderScript: false,
-        inlineStyles: false,
-        removeUnusedStyles: false,
-        canonicalLink: false,
-        collapseWhitespace: false,
-        ssrIds: false
-      };
-
-      const results = await renderer.hydrate(hydrateOpts);
-
-      if (results.diagnostics.length) {
-        const msg = results.diagnostics.map(d => d.messageText).join('\n');
-        throw new Error(msg);
-      }
-
-      elm = (results.root && results.root.children.length > 1 && results.root.children[1].firstElementChild) || null;
-      if (elm) {
-        // trick to get the private platform (shhh)
-        platforms.set(this, (results as any).__testPlatform);
-        delete (results as any).__testPlatform;
-
-        // get the window from the element just created
-        this.window = elm.ownerDocument.defaultView as any;
-      }
-
-    } catch (e) {
-      logger.error(e);
-    }
-
-    logger.printLogs();
-
-    return elm;
   }
-
 
   async flush() {
-    const plt = platforms.get(this);
-    await plt.queue.flush();
-
-    const logger = loggers.get(this);
-    logger.printLogs();
+    throw new Error(`TestWindow has not loaded`);
   }
 
-
-  window: Window;
-
-  get document(): Document {
-    return getWindowObj(this, 'document');
-  }
-
-  get history(): History {
-    return getWindowObj(this, 'history');
-  }
-
-  get location(): Location {
-    return getWindowObj(this, 'location');
-  }
-
-  get navigator(): Navigator {
-    return getWindowObj(this, 'navigator');
-  }
-
-  get CustomEvent(): typeof CustomEvent {
-    return getWindowObj(this, 'CustomEvent');
-  }
-
-  get Event(): typeof Event {
-    return getWindowObj(this, 'Event');
-  }
-
-  get URL(): typeof URL {
-    return getWindowObj(this, 'URL');
+  async content(): Promise<string> {
+    throw new Error(`TestWindow has not loaded`);
   }
 
 }
 
-// shared window which can be reused
-let sharedWindow: any;
 
-function getWindowObj(testWindow: TestWindow, key: string) {
-  if (testWindow.window) {
-    // we've already created the window for this TestWindow, use this one
-    return (testWindow.window as any)[key];
-  }
+async function loadHtml(page: puppeteer.Page, opts: d.TestWindowLoadOptions) {
+  const url = [
+    `data:text/html;charset=UTF-8,`,
+    opts.html
+  ];
 
-  if (!sharedWindow) {
-    // we don't have a window created, so use the shared one
-    // but first let's create the shared one (which could get reused)
-    const opts: d.OutputTargetHydrate = {
-      type: 'www',
-      url: DEFAULT_URL,
-      userAgent: DEFAULT_USER_AGENT
-    };
+  await page.goto(url.join(''), {
+    waitUntil: 'load'
+  });
 
-    sharedWindow = mockStencilSystem().createDom().parse(opts);
-  }
-
-  // we don't have a window created, so use the shared one
-  return sharedWindow[key];
 }
 
 
-export interface TestWindowLoadOptions {
-  components: any[];
-  html: string;
-  url?: string;
-  userAgent?: string;
-  cookie?: string;
-  direction?: string;
-  language?: string;
+async function initTestWindowProperties(testWindow: TestWindow, testPage: d.JestTestPage, page: puppeteer.Page) {
+  let windowHandle = await page.evaluateHandle(() => window);
+
+  Object.defineProperty(testWindow, 'window', {
+    get: () => {
+      return windowHandle.getProperty('window');
+    }
+  });
+
+  Object.defineProperty(testWindow, 'document', {
+    get: () => {
+      return windowHandle.getProperty('document');
+    }
+  });
+
+  testPage.close = async () => {
+    await windowHandle.dispose();
+    windowHandle = null;
+
+    delete testWindow.window;
+    delete testWindow.document;
+    delete testWindow.document;
+    delete testWindow.history;
+    delete testWindow.location;
+    delete testWindow.navigator;
+    delete testWindow.CustomEvent;
+    delete testWindow.Event;
+    delete testWindow.URL;
+  };
 }
 
 
-function validateTestWindowLoadOptions(opts: TestWindowLoadOptions) {
+function validateTestWindowLoadOptions(hasLoaded: boolean, opts: d.TestWindowLoadOptions) {
+  if (hasLoaded) {
+    throw new Error(`TestWindow load() cannot be called more than once on the same instance`);
+  }
+
   if (!opts) {
     throw new Error('missing TestWindow load() options');
   }
+
   if (!opts.components) {
     throw new Error(`missing TestWindow load() components: ${opts}`);
   }
+
   if (!Array.isArray(opts.components)) {
     throw new Error(`TestWindow load() components must be an array: ${opts}`);
   }
+
   if (typeof opts.html !== 'string') {
     throw new Error(`TestWindow load() html must be a string: ${opts}`);
   }
-
-  if (typeof opts.url !== 'string') {
-    opts.url = DEFAULT_URL;
-  }
-
-  if (typeof opts.userAgent !== 'string') {
-    opts.userAgent = DEFAULT_USER_AGENT;
-  }
 }
-
-
-const DEFAULT_URL = `http://testwindow.stenciljs.com/`;
-const DEFAULT_USER_AGENT = `testwindow`;

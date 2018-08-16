@@ -18,6 +18,9 @@ const DECLARATIONS_DIST_DIR = path.join(DST_DIR, 'client', 'declarations');
 const inputCoreFile = path.join(TRANSPILED_DIR, 'client', 'core-browser.js');
 const outputCoreFile = path.join(DIST_CLIENT_DIR, 'core.build.js');
 
+const inputCoreTestingFile = path.join(TRANSPILED_DIR, 'client', 'core-testing.js');
+const outputCoreTestingFile = path.join(DIST_CLIENT_DIR, 'core.testing.js');
+
 const inputLoaderFile = path.join(TRANSPILED_DIR, 'client', 'loader.js');
 const outputLoaderFile = path.join(DST_DIR, 'client', 'loader.js');
 
@@ -37,6 +40,7 @@ if (success) {
 
   // tasks
   bundleClientCore();
+  bundleClientCoreTesting();
   buildLoader(inputLoaderFile, outputLoaderFile);
   buildCoreEsm(inputCoreEsmFile, outputCoreEsmFile);
   copyMain();
@@ -65,6 +69,42 @@ if (success) {
         code = dynamicImportFnHack(code);
 
         fs.writeFile(outputCoreFile, code, (err) => {
+          if (err) {
+            console.log(err);
+            process.exit(1);
+          }
+        });
+
+      })
+    })
+    .catch(err => {
+      console.log(err);
+      console.log(err.stack);
+      process.exit(1);
+    });
+  }
+
+
+  function bundleClientCoreTesting() {
+    return rollup.rollup({
+      input: inputCoreTestingFile,
+      onwarn: (message) => {
+        if (/top level of an ES module/.test(message)) return;
+        console.error( message );
+      }
+    })
+    .then(bundle => {
+      bundle.generate({
+        format: 'es',
+        intro: '(function(window, document, Context, namespace) {\n"use strict";\n',
+        outro: '})(window, document, Context, namespace);'
+
+      }).then(clientCore => {
+
+        let code = clientCore.code.trim();
+        code = dynamicImportFnHack(code);
+
+        fs.writeFile(outputCoreTestingFile, code, (err) => {
           if (err) {
             console.log(err);
             process.exit(1);

@@ -29,6 +29,7 @@ export interface AppRegistry {
   loader?: string;
   core?: string;
   corePolyfilled?: string;
+  coreSsrAnnotations?: string;
   global?: string;
   components?: AppRegistryComponents;
 }

@@ -33,6 +33,7 @@ export interface CompilerCtx {
   isActivelyBuilding?: boolean;
   lastBuildConditionalsBrowserEsm?: d.BuildConditionals;
   lastBuildConditionalsBrowserEs5?: d.BuildConditionals;
+  lastBuildConditionalsBrowserSsr?: d.BuildConditionals;
   lastBuildConditionalsEsmEs5?: d.BuildConditionals;
   lastComponentStyleInput?: Map<string, string>;
   lastBuildHadError?: boolean;

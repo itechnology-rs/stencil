@@ -50,11 +50,11 @@ export async function generateAppFilesOutputTarget(config: d.Config, compilerCtx
       // browser core esm build
       generateBrowserCoreEsm(config, compilerCtx, buildCtx, outputTarget, entryModules, appRegistry),
 
-      // browser core es5 build
-      generateBrowserCoreEs5(config, compilerCtx, buildCtx, outputTarget, entryModules, appRegistry),
-
       // core esm
-      generateEsmCore(config, compilerCtx, buildCtx, outputTarget, entryModules, appRegistry)
+      generateEsmCore(config, compilerCtx, buildCtx, outputTarget, entryModules, appRegistry),
+
+      // browser core es5 build
+      generateBrowserCoreEs5(config, compilerCtx, buildCtx, outputTarget, entryModules, appRegistry)
     ]);
 
     await Promise.all([
@@ -95,6 +95,13 @@ async function generateBrowserCoreEs5(config: d.Config, compilerCtx: d.CompilerC
 
     const coreFilenameEs5 = await generateCoreBrowser(config, compilerCtx, buildCtx, outputTarget, globalJsContentsEs5, buildConditionalsEs5);
     appRegistry.corePolyfilled = coreFilenameEs5;
+
+    // browser core ssr build
+    const buildConditionalsSsr = await setBuildConditionals(config, compilerCtx, 'core.ssr', buildCtx, entryModules);
+
+    const coreFilenameSsr = await generateCoreBrowser(config, compilerCtx, buildCtx, outputTarget, globalJsContentsEs5, buildConditionalsSsr);
+    appRegistry.coreSsrAnnotations = coreFilenameSsr;
+
 
   } else {
     // not doing an es5, probably in dev mode

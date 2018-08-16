@@ -75,7 +75,7 @@ export function createRendererPatch(plt: d.PlatformApi, domApi: d.DomApi): d.Ren
         domApi.$addClass(elm, (elm['s-si'] = scopeId));
       }
 
-      if (__BUILD_CONDITIONALS__.ssrServerSide && isDef(ssrId)) {
+      if (__BUILD_CONDITIONALS__.ssrAnnotation && isDef(ssrId)) {
         // SSR ONLY: this is an SSR render and this
         // logic does not run on the client
 
@@ -94,7 +94,7 @@ export function createRendererPatch(plt: d.PlatformApi, domApi: d.DomApi): d.Ren
 
           // return node could have been null
           if (childNode) {
-            if (__BUILD_CONDITIONALS__.ssrServerSide && isDef(ssrId) && childNode.nodeType === NODE_TYPE.TextNode && !childNode['s-cr']) {
+            if (__BUILD_CONDITIONALS__.ssrAnnotation && isDef(ssrId) && childNode.nodeType === NODE_TYPE.TextNode && !childNode['s-cr']) {
               // SSR ONLY: add the text node's start comment
               domApi.$appendChild(elm, domApi.$createComment('s.' + ssrId + '.' + i));
             }
@@ -102,7 +102,7 @@ export function createRendererPatch(plt: d.PlatformApi, domApi: d.DomApi): d.Ren
             // append our new node
             domApi.$appendChild(elm, childNode);
 
-            if (__BUILD_CONDITIONALS__.ssrServerSide && isDef(ssrId) && childNode.nodeType === NODE_TYPE.TextNode && !childNode['s-cr']) {
+            if (__BUILD_CONDITIONALS__.ssrAnnotation && isDef(ssrId) && childNode.nodeType === NODE_TYPE.TextNode && !childNode['s-cr']) {
               // SSR ONLY: add the text node's end comment
               domApi.$appendChild(elm, domApi.$createComment('/'));
               domApi.$appendChild(elm, domApi.$createTextNode(' '));
@@ -569,7 +569,7 @@ export function createRendererPatch(plt: d.PlatformApi, domApi: d.DomApi): d.Ren
     contentRef = hostElm['s-cr'];
     useNativeShadowDom = useNativeShadowDomVal;
 
-    if (__BUILD_CONDITIONALS__.ssrServerSide) {
+    if (__BUILD_CONDITIONALS__.ssrAnnotation) {
       if (encapsulation !== 'shadow') {
         ssrId = ssrPatchId;
       } else {
@@ -588,7 +588,7 @@ export function createRendererPatch(plt: d.PlatformApi, domApi: d.DomApi): d.Ren
     // synchronous patch
     patchVNode(oldVNode, newVNode);
 
-    if (__BUILD_CONDITIONALS__.ssrServerSide && isDef(ssrId)) {
+    if (__BUILD_CONDITIONALS__.ssrAnnotation && isDef(ssrId)) {
       // SSR ONLY: we've been given an SSR id, so the host element
       // should be given the ssr id attribute
       domApi.$setAttribute(oldVNode.elm, SSR_VNODE_ID, ssrId);

@@ -88,6 +88,7 @@
     "open-in-editor": "2.2.0",
     "opn": "5.2.0",
     "postcss": "6.0.21",
+    "puppeteer": "^1.7.0",
     "semver": "5.5.0",
     "source-map": "^0.7.0",
     "terser": "3.8.1",
@@ -119,20 +120,11 @@
     "progressive web app"
   ],
   "jest": {
-    "testEnvironment": "node",
-    "setupTestFrameworkScriptFile": "<rootDir>/scripts/setupTests.js",
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js"
-    ],
-    "transform": {
-      "^.+\\.(ts|tsx)$": "<rootDir>/scripts/jest.preprocessor.js"
-    },
-    "testRegex": "/src/.*\\.spec\\.(ts|tsx|js)$",
+    "preset": "./testing/jest-preset.js",
     "testPathIgnorePatterns": [
       "/node_modules",
-      "<rootDir>/test"
-    ]
+      "/scripts"
+    ],
+    "testRegex": "/Users/adam/git/stencil/src/testing/test/render.spec.ts"
   }
 }

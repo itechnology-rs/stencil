@@ -26,15 +26,17 @@ if (success) {
     rollup.rollup({
       input: ENTRY_FILE,
       external: [
+        'fs',
+        'os',
+        'path',
+        'puppeteer',
         'rollup',
         'rollup-plugin-commonjs',
         'rollup-plugin-node-resolve',
         'rollup-plugin-node-builtins',
         'rollup-plugin-node-globals',
         'rollup-pluginutils',
-        'typescript',
-        'fs',
-        'path'
+        'typescript'
       ],
       plugins: [
         rollupResolve({

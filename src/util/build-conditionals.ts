@@ -10,7 +10,7 @@ export function getDefaultBuildConditionals(): d.BuildConditionals {
     cssVarShim: true,
     shadowDom: true,
     slotPolyfill: true,
-    ssrServerSide: true,
+    ssrAnnotation: true,
     devInspector: true,
     hotModuleReplacement: true,
     verboseError: true,
@@ -45,7 +45,7 @@ export function getDefaultBuildConditionals(): d.BuildConditionals {
 export async function setBuildConditionals(
   config: d.Config,
   compilerCtx: d.CompilerCtx,
-  coreId: 'core' | 'core.pf' | 'esm.es5',
+  coreId: 'core' | 'core.pf' | 'core.ssr' | 'esm.es5',
   buildCtx: d.BuildCtx,
   entryModules: d.EntryModule[]
 ): Promise<d.BuildConditionals> {
@@ -76,7 +76,7 @@ export async function setBuildConditionals(
     polyfills: false,
     es5: false,
     cssVarShim: false,
-    ssrServerSide: false,
+    ssrAnnotation: false,
     shadowDom: false,
     slotPolyfill: false,
     event: false,
@@ -126,6 +126,15 @@ export async function setBuildConditionals(
     coreBuild.slotPolyfill = !!(buildCtx.hasSlot);
     compilerCtx.lastBuildConditionalsBrowserEs5 = coreBuild;
 
+  } else if (coreId === 'core.ssr') {
+    coreBuild.ssrAnnotation = true;
+    coreBuild.browserModuleLoader = true;
+    coreBuild.es5 = true;
+    coreBuild.polyfills = true;
+    coreBuild.cssVarShim = true;
+    coreBuild.slotPolyfill = !!(buildCtx.hasSlot);
+    compilerCtx.lastBuildConditionalsBrowserSsr = coreBuild;
+
   } else if (coreId === 'esm.es5') {
     coreBuild.es5 = true;
     coreBuild.externalModuleLoader = true;
@@ -141,7 +150,7 @@ export async function setBuildConditionals(
 }
 
 
-export function getLastBuildConditionals(compilerCtx: d.CompilerCtx, coreId: 'core' | 'core.pf' | 'esm.es5', buildCtx: d.BuildCtx) {
+export function getLastBuildConditionals(compilerCtx: d.CompilerCtx, coreId: 'core' | 'core.pf' | 'core.ssr' | 'esm.es5', buildCtx: d.BuildCtx) {
   if (buildCtx.isRebuild && Array.isArray(buildCtx.filesChanged)) {
     // this is a rebuild and we do have lastBuildConditionals already
     const hasChangedTsFile = buildCtx.filesChanged.some(filePath => {
@@ -157,6 +166,10 @@ export function getLastBuildConditionals(compilerCtx: d.CompilerCtx, coreId: 'co
 
       if (coreId === 'core.pf' && compilerCtx.lastBuildConditionalsBrowserEs5) {
         return compilerCtx.lastBuildConditionalsBrowserEs5;
+      }
+
+      if (coreId === 'core.ssr' && compilerCtx.lastBuildConditionalsBrowserEs5) {
+        return compilerCtx.lastBuildConditionalsBrowserSsr;
       }
 
       if (coreId === 'esm.es5' && compilerCtx.lastBuildConditionalsEsmEs5) {

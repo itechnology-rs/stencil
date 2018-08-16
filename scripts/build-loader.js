@@ -6,11 +6,11 @@ function buildLoader(inputLoaderFile, outputLoaderFile) {
 
   content = content.replace(/export function /g, 'function ');
 
-  content = `(function(win, doc, namespace, fsNamespace, resourcesUrl, appCore, appCoreSsr, appCorePolyfilled, hydratedCssClass, components) {
+  content = `(function(win, doc, namespace, fsNamespace, resourcesUrl, appCore, appCoreSsr, appCorePolyfilled, appCoreSsrAnnotations, botRegEx, hydratedCssClass, components) {
 
   ${content}
 
-  init(win, doc, namespace, fsNamespace, resourcesUrl, appCore, appCoreSsr, appCorePolyfilled, hydratedCssClass, components);
+  init(win, doc, namespace, fsNamespace, resourcesUrl, appCore, appCoreSsr, appCorePolyfilled, appCoreSsrAnnotations, botRegEx, hydratedCssClass, components);
 
   })(window, document, '__APP__');`;
 

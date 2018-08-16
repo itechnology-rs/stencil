@@ -2,7 +2,7 @@
 
 export interface BuildConditionals {
   [key: string]: any;
-  coreId: 'core' | 'core.pf' | 'esm.es5';
+  coreId: 'core' | 'core.pf' | 'core.ssr' | 'esm.es5';
   polyfills: boolean;
   es5: boolean;
   cssVarShim: boolean;
@@ -17,8 +17,8 @@ export interface BuildConditionals {
   hotModuleReplacement: boolean;
   verboseError: boolean;
 
-  // ssr
-  ssrServerSide: boolean;
+  // ssr annotations
+  ssrAnnotation: boolean;
 
   // encapsulation
   styles: boolean;

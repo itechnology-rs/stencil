@@ -9,6 +9,8 @@ export function init(
   resourcesUrl: string,
   appCore: string,
   appCorePolyfilled: string,
+  appCoreSsrAnnotations: string,
+  botRegEx: RegExp,
   hydratedCssClass: string,
   components: d.ComponentHostData[],
   HTMLElementPrototype: any,
@@ -62,7 +64,11 @@ export function init(
   // if either of those are not supported, then use the core w/ polyfills
   // also check if the page was build with ssr or not
   x = doc.createElement('script');
-  if (usePolyfills(win, win.location, x, 'import("")')) {
+  if (botRegEx && botRegEx.test((win.navigator && win.navigator.userAgent) || '')) {
+    // requires the ssr annontation core
+    x.src = resourcesUrl + appCoreSsrAnnotations;
+
+  } else if (usePolyfills(win, win.location, x, 'import("")')) {
     // requires the es5/polyfilled core
     x.src = resourcesUrl + appCorePolyfilled;
 

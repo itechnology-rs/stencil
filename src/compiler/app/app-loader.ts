@@ -25,11 +25,15 @@ export async function generateLoader(
 
   let loaderContent = await config.sys.getClientCoreFile({ staticName: CLIENT_LOADER_SOURCE });
 
+  const botRegEx: RegExp = null;
+
   loaderContent = injectAppIntoLoader(
     config,
     outputTarget,
     appRegistry.core,
     appRegistry.corePolyfilled,
+    appRegistry.coreSsrAnnotations,
+    botRegEx,
     config.hydratedCssClass,
     cmpRegistry,
     loaderContent
@@ -65,6 +69,8 @@ export function injectAppIntoLoader(
   outputTarget: d.OutputTargetBuild,
   appCoreFileName: string,
   appCorePolyfilledFileName: string,
+  appCoreSsrAnnotationsFileName: string,
+  botRegEx: RegExp,
   hydratedCssClass: string,
   cmpRegistry: d.ComponentRegistry,
   loaderContent: string
@@ -81,6 +87,8 @@ export function injectAppIntoLoader(
     `${resourcesUrl}`,
     `"${appCoreFileName}"`,
     `"${appCorePolyfilledFileName}"`,
+    `"${appCoreSsrAnnotationsFileName}"`,
+    `${botRegEx}`,
     `"${hydratedCssClass}"`,
     cmpLoaderRegistryStr,
     'HTMLElement.prototype'

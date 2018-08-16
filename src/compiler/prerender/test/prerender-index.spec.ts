@@ -23,7 +23,7 @@ describe('prerender index', () => {
     config = new TestingConfig();
     __BUILD_CONDITIONALS__.shadowDom = false;
     __BUILD_CONDITIONALS__.slotPolyfill = true;
-    __BUILD_CONDITIONALS__.ssrServerSide = true;
+    __BUILD_CONDITIONALS__.ssrAnnotation = true;
     config.buildAppCore = true;
     config.flags.prerender = true;
 
