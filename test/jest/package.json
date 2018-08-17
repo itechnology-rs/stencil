@@ -2,6 +2,7 @@
   "name": "@stencil/test-testing",
   "private": true,
   "scripts": {
+    "start": "node ../../bin/stencil build --debug --watch --dev --serve",
     "test": "node ../../node_modules/.bin/jest --no-cache --debug"
   },
   "jest": {

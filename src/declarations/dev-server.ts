@@ -84,6 +84,7 @@ export interface DevResponseHeaders {
   'Content-Type'?: string;
   'Content-Length'?: number;
   'X-Powered-By'?: string;
+  'Access-Control-Allow-Origin'?: string;
 }
 
 

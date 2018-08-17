@@ -14,7 +14,8 @@ export async function setupTestPuppeteer() {
 
   // https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md#puppeteerlaunchoptions
   sharedGlobalBrowser = await puppeteer.launch({
-    ignoreHTTPSErrors: true
+    ignoreHTTPSErrors: true,
+    headless: false
   });
 
   const env: d.JestProcessEnv = process.env;
@@ -43,6 +44,22 @@ export async function newPage() {
     }
   });
 
+  page.on('pageerror', (e) => {
+    console.log('pageerror', e);
+  });
+
+  page.on('request', (r) => {
+    console.log('\n\n\nrequest', r.url(), '\n\n\n\n');
+  });
+
+  page.on('response', (r) => {
+    console.log('\n\n\nresponse', r.url(), r.status(), '\n\n\n\n');
+  });
+
+  page.on('console', (c) => {
+    console.log('\n\n\nconsole', c.type(), c.text(), '\n\n\n\n');
+  });
+
   page.setContent = async (html: string) => {
     const env: d.JestProcessEnv = process.env;
     const loaderUrl = env.__STENCIL_TEST_LOADER_SCRIPT_URL__;
@@ -53,22 +70,23 @@ export async function newPage() {
       html
     ];
 
-    await page.goto(url.join(''), {
-      waitUntil: 'networkidle2'
+    await page.evaluateOnNewDocument(() => {
+      window.addEventListener('appload', e => {
+        console.log('appload', e);
+        (window as any).stencilTestAppLoaded = true;
+      });
     });
+
+    const appLoaded = page.waitForFunction('window.stencilTestAppLoaded');
+
+    await page.goto(url.join(''), {
+      waitUntil: 'load'
+    });
+
+    console.log(await page.content());
+
+    await appLoaded;
   };
-
-  page.on('pageerror', (e) => {
-    console.log('pageerror', e);
-  });
-
-  page.on('request', (r) => {
-    console.log('request', r.url());
-  });
-
-  page.on('response', (r) => {
-    console.log('response', r.url(), r.status());
-  });
 
   return page;
 }
