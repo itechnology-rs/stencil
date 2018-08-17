@@ -45,19 +45,16 @@ export async function newPage() {
   });
 
   page.on('pageerror', (e) => {
-    console.log('pageerror', e);
-  });
-
-  page.on('request', (r) => {
-    console.log('\n\n\nrequest', r.url(), '\n\n\n\n');
-  });
-
-  page.on('response', (r) => {
-    console.log('\n\n\nresponse', r.url(), r.status(), '\n\n\n\n');
+    console.error('pageerror', e);
   });
 
   page.on('console', (c) => {
-    console.log('\n\n\nconsole', c.type(), c.text(), '\n\n\n\n');
+    const type = c.type();
+    if (type === 'error' || type === 'warning' || type === 'debug') {
+      (console as any)[type]('console', type, c.text());
+    } else {
+      console.log('console', type, c.text());
+    }
   });
 
   page.setContent = async (html: string) => {
@@ -82,8 +79,6 @@ export async function newPage() {
     await page.goto(url.join(''), {
       waitUntil: 'load'
     });
-
-    console.log(await page.content());
 
     await appLoaded;
   };
