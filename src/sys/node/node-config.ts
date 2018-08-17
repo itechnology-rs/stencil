@@ -45,7 +45,7 @@ export function loadConfigFile(fs: d.FileSystem, configPath: string, process?: N
     config = configFileData.config;
     config.configPath = configPath;
 
-    if (!config.rootDir && configPath) {
+    if (configPath) {
       config.rootDir = path.dirname(configPath);
     }
 

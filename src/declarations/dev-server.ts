@@ -1,6 +1,12 @@
 import * as d from '.';
 
 
+export interface DevServer {
+  browserUrl: string;
+  close(): Promise<void>;
+}
+
+
 export interface DevServerConfig {
   address?: string;
   baseUrl?: string;

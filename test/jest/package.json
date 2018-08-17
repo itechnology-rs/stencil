@@ -2,10 +2,10 @@
   "name": "@stencil/test-testing",
   "private": true,
   "scripts": {
-    "test": "node ../../node_modules/.bin/jest --no-cache"
+    "test": "node ../../node_modules/.bin/jest --no-cache --debug"
   },
   "jest": {
     "preset": "../../testing/jest-preset.js",
-    "testRegex": ".*\\.spec\\.(ts|tsx|js)$"
+    "testRegex": "element.spec.ts"
   }
 }

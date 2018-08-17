@@ -1,13 +1,15 @@
 import * as d from '../declarations';
-import { getBrowserWSEndpoint } from './jest-global';
-import * as puppeteer from 'puppeteer';
+import * as customExpect from './expect';
+import { connectBrowser, newBrowserPage } from './puppeteer-api';
+import { getDefaultBuildConditionals } from '../build-conditionals';
+import { spyOnEvent } from './utils';
 const NodeEnvironment = require('jest-environment-node');
 
 
 export class JestEnvironment extends NodeEnvironment {
   private global: d.JestEnvironmentGlobal;
-  private browser: puppeteer.Browser = null;
-  private testPages: d.JestTestPage[] = [];
+  private browser: any = null;
+  private pages: any[] = [];
 
 
   constructor(config: any) {
@@ -15,55 +17,44 @@ export class JestEnvironment extends NodeEnvironment {
   }
 
   async setup() {
-    this.global.createTestPage = this.createTestPage.bind(this);
+    this.global.__PUPPETEER_NEW_PAGE__ = this.newPuppeteerPage.bind(this);
   }
 
-  async createTestPage() {
+  async newPuppeteerPage() {
     if (!this.browser) {
       // load the browser and page on demand
-      this.browser = await this.loadBrowser();
+      this.browser = await connectBrowser();
     }
 
-    const page = await this.browser.newPage();
+    const page = await newBrowserPage(this.browser);
 
-    const testPage: d.JestTestPage = {
-      page: page
-    };
+    this.pages.push(page);
 
-    this.testPages.push(testPage);
-
-    return testPage;
-  }
-
-  async loadBrowser() {
-    const browserWSEndpoint = await getBrowserWSEndpoint();
-
-    const connectOpts: puppeteer.ConnectOptions = {
-      browserWSEndpoint: browserWSEndpoint,
-      ignoreHTTPSErrors: true
-    };
-
-    return await puppeteer.connect(connectOpts);
+    return page;
   }
 
   async teardown() {
     await super.teardown();
 
-    await Promise.all(this.testPages.map(async testPage => {
-      if (testPage.close) {
-        await testPage.close();
-        testPage.close = null;
-      }
-
-      if (testPage.page) {
-        await (testPage.page as puppeteer.Page).close();
-        testPage.page = null;
-      }
+    await Promise.all(this.pages.map(async page => {
+      await page.close();
     }));
 
-    this.testPages.length = 0;
+    this.pages.length = 0;
 
     this.browser = null;
   }
 
+}
+
+
+declare const global: d.JestEnvironmentGlobal;
+
+export function jestSetupTestFramework() {
+  global.__BUILD_CONDITIONALS__ = getDefaultBuildConditionals();
+  global.Context = {};
+  global.h = h;
+  global.resourcesUrl = '/build';
+  global.spyOnEvent = spyOnEvent;
+  expect.extend(customExpect);
 }

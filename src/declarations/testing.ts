@@ -1,4 +1,3 @@
-import * as d from '.';
 
 declare global {
   namespace jest {
@@ -15,22 +14,19 @@ declare global {
 
 
 export interface JestEnvironmentGlobal {
-  __BUILD_CONDITIONALS__: d.BuildConditionals;
+  __BUILD_CONDITIONALS__: any;
+  __PUPPETEER_NEW_PAGE__: () => Promise<any>;
   Context: any;
-  createTestPage: () => Promise<JestTestPage>;
+  loadTestWindow: (testWindow: any) => Promise<void>;
   h: any;
   resourcesUrl: string;
   spyOnEvent: (el: Node, eventName: string) => jest.Mock<{}>;
 }
 
 
-export interface JestTestPage {
-  page: any;
-  close?: () => Promise<void>;
-}
-
-
-export interface TestWindowLoadOptions {
-  components: any[];
-  html: string;
+export interface JestProcessEnv {
+  __STENCIL_TEST_ROOT_DIR__?: string;
+  __STENCIL_TEST_BROWSER_URL__?: string;
+  __STENCIL_TEST_LOADER_SCRIPT_URL__?: string;
+  __STENCIL_TEST_BROWSER_WS_ENDPOINT__?: string;
 }
