@@ -49,8 +49,6 @@ export function transpile(input: string, opts: TranspileOptions = {}, path?: str
 export interface TranspileOptions {
   module?: string;
   target?: string;
-  baseUrl?: string;
-  paths?: { [moduleId: string]: string[] };
   [key: string]: any;
 }
 
