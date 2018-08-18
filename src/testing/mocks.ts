@@ -1,4 +1,5 @@
 import * as d from '../declarations';
+import { BuildContext } from '../compiler/build/build-ctx';
 import { Cache } from '../compiler/cache';
 import { createDomApi } from '../renderer/dom-api';
 import { createPlatformServer } from '../server/platform-server';
@@ -7,13 +8,55 @@ import { createRendererPatch } from '../renderer/vdom/patch';
 import { initComponentInstance } from '../core/init-component-instance';
 import { initHostElement } from '../core/init-host-element';
 import { InMemoryFileSystem } from '../util/in-memory-fs';
+import { MockComment } from './mocks/mock-comment';
+import { MockElement } from './mocks/mock-element';
+import { MockDocument } from './mocks/mock-document';
+import { MockTextNode } from './mocks/mock-text-node';
+import { MockWindow } from './mocks/mock-window';
 import { TestingConfig } from './testing-config';
-import { TestingSystem } from './testing-sys';
 import { TestingFs } from './testing-fs';
 import { TestingLogger } from './testing-logger';
+import { TestingSystem } from './testing-sys';
 import { validateConfig } from '../compiler/config/validate-config';
-import { BuildContext } from '../compiler/build/build-ctx';
-import './expect';
+
+
+export function mockWindow() {
+  const win = new MockWindow();
+  return (win as any) as Window;
+}
+
+export function mockDocument() {
+  const doc = new MockDocument();
+  return (doc as any) as Document;
+}
+
+export function mockElement<K extends keyof HTMLElementTagNameMap>(tagName?: K) {
+  const elm = new MockElement(tagName || 'div');
+  return (elm as any) as K;
+}
+
+export function mockElementNS(namespaceURI: string, name: string) {
+  const elm = new MockElement(name);
+  elm.namespaceURI = namespaceURI;
+  return (elm as any) as HTMLElement;
+}
+
+export function mockSvgElement() {
+  const elm = new MockElement('svg');
+  elm.namespaceURI = 'http://www.w3.org/2000/svg';
+  return (elm as any) as SVGElement;
+}
+
+export function mockTextNode(text: string) {
+  const textNode = new MockTextNode(text);
+  return (textNode as any) as Text;
+}
+
+export function mockComment(text: string) {
+  const commentNode = new MockComment(text);
+  return (commentNode as any) as Comment;
+}
+
 
 export function mockPlatform(win?: any, domApi?: d.DomApi, cmpRegistry?: d.ComponentRegistry) {
   const hydrateResults: d.HydrateResults = {
@@ -146,29 +189,6 @@ export function mockCache() {
 }
 
 
-export function mockWindow() {
-  const opts: d.OutputTargetHydrate = {
-    type: 'www',
-    userAgent: 'test'
-  };
-
-  const window = mockStencilSystem().createDom().parse(opts);
-
-  (window as any).requestAnimationFrame = (callback: Function) => {
-    setTimeout(() => {
-      callback(Date.now());
-    });
-  };
-
-  return window;
-}
-
-
-export function mockDocument(window?: Window) {
-  return (window || mockWindow()).document;
-}
-
-
 export function mockDomApi(win?: any, doc?: any) {
   const App: d.AppGlobal = {};
   win = win || mockWindow();
@@ -188,20 +208,10 @@ export function mockQueue() {
 }
 
 
-export function mockHtml(html: string): HTMLHtmlElement {
-  const jsdom = require('jsdom');
-  return jsdom.JSDOM.fragment(html.trim()).firstChild;
+export function mockHtml(_html: string): HTMLHtmlElement {
+  throw new Error('todo! hey, do the thing here');
 }
 
-export function mockSVGElement(): SVGElement {
-  const jsdom = require('jsdom');
-  return jsdom.JSDOM.fragment(`<svg xmlns="http://www.w3.org/2000/svg"></svg>`).firstChild;
-}
-
-export function mockElement(tag = 'div'): HTMLElement {
-  const jsdom = require('jsdom');
-  return jsdom.JSDOM.fragment(`<${tag}></${tag}>`).firstChild;
-}
 
 export function mockComponentInstance(plt: d.PlatformApi, domApi: d.DomApi, cmpMeta: d.ComponentMeta = {}): d.ComponentInstance {
   mockDefine(plt, cmpMeta);
@@ -213,11 +223,6 @@ export function mockComponentInstance(plt: d.PlatformApi, domApi: d.DomApi, cmpM
   };
 
   return initComponentInstance(plt, elm, hostSnapshot);
-}
-
-export function mockTextNode(text: string): Element {
-  const jsdom = require('jsdom');
-  return jsdom.JSDOM.fragment(text).firstChild;
 }
 
 
@@ -249,15 +254,16 @@ export function mockDispatchEvent(domApi: d.DomApi, el: HTMLElement, name: strin
   return el.dispatchEvent(ev);
 }
 
-export async function mockConnect(plt: MockedPlatform, html: string) {
-  const jsdom = require('jsdom');
-  const rootNode = jsdom.JSDOM.fragment(html);
+export async function mockConnect(_plt: MockedPlatform, _html: string) {
+  throw new Error('we still need this?');
+  // const jsdom = require('jsdom');
+  // const rootNode = jsdom.JSDOM.fragment(html);
 
-  connectComponents(plt, rootNode);
+  // connectComponents(plt, rootNode);
 
-  await plt.$flushQueue();
+  // await plt.$flushQueue();
 
-  return rootNode;
+  // return rootNode;
 }
 
 

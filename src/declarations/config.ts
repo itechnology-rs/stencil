@@ -127,6 +127,7 @@ export interface StencilConfig {
   srcIndexHtml?: string;
   sys?: d.StencilSystem;
   tsconfig?: string;
+  validateTypes?: boolean;
   watch?: boolean;
   watchIgnoredRegex?: RegExp;
   writeLog?: boolean;

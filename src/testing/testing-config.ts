@@ -23,4 +23,5 @@ export class TestingConfig implements d.Config {
   maxConcurrentWorkers = 1;
   minifyCss: boolean;
   minifyJs: boolean;
+  validateTypes = false;
 }

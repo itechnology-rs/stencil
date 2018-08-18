@@ -24,6 +24,7 @@ export function setupTestConfig() {
   config.buildEs5 = false;
   config.devMode = true;
   config.maxConcurrentWorkers = 1;
+  config.validateTypes = false;
 
   config.flags = config.flags || {};
   config.flags.serve = false;

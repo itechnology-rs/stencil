@@ -1,53 +1,52 @@
-// import { TestWindow } from '../../dist/testing/index';
-// import { EventCmp } from './fixtures/event-cmp';
+import { newPage } from '../../../../dist/testing';
 
 
-// describe('@Event', () => {
+describe('@Event', () => {
 
-//   it('should fire custom event w/ no options', async () => {
-//     const window = new TestWindow();
-//     const element = await window.load({
-//       components: [EventCmp],
-//       html: '<event-cmp></event-cmp>'
-//     });
+  it('should fire custom event w/ no options', async () => {
+    const page = await newPage();
 
-//     const myEventPromise = new Promise<UIEvent>(resolve => {
-//       element.addEventListener('myEvent', (ev: UIEvent) => {
-//         resolve(ev);
-//       });
-//     })
+    await page.setContent(`
+      <event-cmp></event-cmp>
+    `);
 
-//     element.emitEvent();
+    // const myEventPromise = new Promise<UIEvent>(resolve => {
+    //   element.addEventListener('myEvent', (ev: UIEvent) => {
+    //     resolve(ev);
+    //   });
+    // })
 
-//     const ev = await myEventPromise;
+    // element.methodThatFiresMyEvent();
 
-//     expect(ev.type).toBe('myEvent');
-//     expect(ev.bubbles).toBe(true);
-//     expect(ev.cancelable).toBe(true);
-//     expect(ev.detail).toBe(true);
-//   });
+    // const ev = await myEventPromise;
 
-//   it('should fire custom event w/ options', async () => {
-//     const window = new TestWindow();
-//     const element = await window.load({
-//       components: [EventCmp],
-//       html: '<event-cmp></event-cmp>'
-//     });
+    // expect(ev.type).toBe('myEvent');
+    // expect(ev.bubbles).toBe(true);
+    // expect(ev.cancelable).toBe(true);
+    // expect(ev.detail).toBe(true);
+  });
 
-//     const myEventPromise = new Promise<UIEvent>(resolve => {
-//       element.addEventListener('my-event-with-options', (ev: UIEvent) => {
-//         resolve(ev);
-//       });
-//     })
+  // it('should fire custom event w/ options', async () => {
+  //   const window = new TestWindow();
+  //   const element = await window.load({
+  //     components: [EventCmp],
+  //     html: '<event-cmp></event-cmp>'
+  //   });
 
-//     element.fireEventWithOptions();
+  //   const myEventPromise = new Promise<UIEvent>(resolve => {
+  //     element.addEventListener('my-event-with-options', (ev: UIEvent) => {
+  //       resolve(ev);
+  //     });
+  //   })
 
-//     const ev = await myEventPromise;
+  //   element.fireEventWithOptions();
 
-//     expect(ev.type).toBe('my-event-with-options');
-//     expect(ev.bubbles).toBe(false);
-//     expect(ev.cancelable).toBe(false);
-//     expect(ev.detail).toEqual({ mph: 88 });
-//   });
+  //   const ev = await myEventPromise;
 
-// });
+  //   expect(ev.type).toBe('my-event-with-options');
+  //   expect(ev.bubbles).toBe(false);
+  //   expect(ev.cancelable).toBe(false);
+  //   expect(ev.detail).toEqual({ mph: 88 });
+  // });
+
+});

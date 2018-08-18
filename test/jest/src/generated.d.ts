@@ -15,8 +15,8 @@ declare namespace StencilComponents {
   interface ElementCmpAttributes extends JSXElements.HTMLAttributes {}
 
   interface EventCmp {
-    'emitEvent': () => void;
     'fireEventWithOptions': () => void;
+    'methodThatFiresMyEvent': () => void;
   }
   interface EventCmpAttributes extends JSXElements.HTMLAttributes {
     'onMy-event-with-options'?: (event: CustomEvent<{ mph: number }>) => void;

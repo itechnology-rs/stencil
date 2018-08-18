@@ -14,7 +14,7 @@ export class EventCmp {
   }) myEventWithOptions: EventEmitter<{ mph: number }>;
 
   @Method()
-  emitEvent() {
+  methodThatFiresMyEvent() {
     this.myEvent.emit(true);
   }
 

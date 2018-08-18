@@ -80,6 +80,10 @@ export function validateConfig(config: d.Config, setEnvVariables?: boolean) {
 
   setBooleanConfig(config, 'buildEs5', 'es5', !config.devMode);
 
+  if (typeof config.validateTypes !== 'boolean') {
+    config.validateTypes = true;
+  }
+
   setBooleanConfig(config, 'hashFileNames', null, !(config.devMode || config.watch));
   setNumberConfig(config, 'hashedFileNameLength', null, DEFAULT_HASHED_FILENAME_LENTH);
 
