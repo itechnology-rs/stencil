@@ -4,7 +4,7 @@ import { newPage } from '../../../../dist/testing';
 describe('@Event', () => {
 
   it('should fire custom event on window', async () => {
-    // create a new page
+    // create a new puppeteer page
     const page = await newPage();
 
     // load the page with content
@@ -14,17 +14,19 @@ describe('@Event', () => {
 
     // add an event listener on window BEFORE we fire off the event
     // do not "await" on the event's response since it hasn't been fired yet
-    // only get the promise of waiting on the event which we'll await on later
+    // only get the promise of waiting on the event which we'll "await" the data later
+    // the first argument of "page.waitForEvent()" can be either "window", "document"
+    // or an element selector (it uses querySelector)
     const myWindowEventPromise = page.waitForEvent('window', 'myWindowEvent');
 
-    // select the "event-cmp" element
-    // and once it's received, then call it's "methodThatFiresMyWindowEvent()" method
-    // when calling the method it is running within the browser's context
-    // using the @Method here to manually trigger an event for testing
+    // select the "event-cmp" element within the page (same as querySelector)
+    // and once it's received, then call the component's "methodThatFiresMyWindowEvent()" method
+    // when calling the method it is executing it within the browser's context
+    // we're using the @Method here to manually trigger an event from the component for testing
     await page.$eval('event-cmp', (elm: any) => elm.methodThatFiresMyWindowEvent(88));
 
-    // now that the method has been fired, the even fired too
-    // wait on receiving the event that was just triggered
+    // now that the method has been fired, the component's event fired too
+    // let's now "await" on receiving the event that was just triggered
     const myWindowEvent = await myWindowEventPromise;
 
     // the event has been received, test we have the correct values
