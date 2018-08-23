@@ -9,7 +9,7 @@ import { JSXElements } from '@stencil/core';
 
 
 
-declare namespace StencilComponents {
+export namespace StencilComponents {
 
   interface ElementCmp {}
   interface ElementCmpAttributes extends JSXElements.HTMLAttributes {}
