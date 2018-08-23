@@ -13,13 +13,21 @@ export class EventCmp {
     cancelable: false
   }) myEventWithOptions: EventEmitter<{ mph: number }>;
 
+  @Event() myWindowEvent: EventEmitter<number>;
+
+  @Method()
+  methodThatFiresMyWindowEvent(value: number) {
+    console.log('methodThatFiresMyWindowEvent', value)
+    this.myWindowEvent.emit(value);
+  }
+
   @Method()
   methodThatFiresMyEvent() {
     this.myEvent.emit(true);
   }
 
   @Method()
-  fireEventWithOptions() {
+  methodThatFiresEventWithOptions() {
     this.myEventWithOptions.emit({ mph: 88 });
   }
 

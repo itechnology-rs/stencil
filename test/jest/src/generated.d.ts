@@ -9,75 +9,83 @@ import { JSXElements } from '@stencil/core';
 
 
 
-export namespace StencilComponents {
 
-  interface ElementCmp {}
-  interface ElementCmpAttributes extends JSXElements.HTMLAttributes {}
+interface ElementCmp {}
+interface ElementCmpAttributes extends JSXElements.HTMLAttributes {}
 
-  interface EventCmp {
-    'fireEventWithOptions': () => void;
-    'methodThatFiresMyEvent': () => void;
-  }
-  interface EventCmpAttributes extends JSXElements.HTMLAttributes {
-    'onMy-event-with-options'?: (event: CustomEvent<{ mph: number }>) => void;
-    'onMyEvent'?: (event: CustomEvent<boolean>) => void;
-  }
+interface EventCmp {
+  'methodThatFiresEventWithOptions': () => void;
+  'methodThatFiresMyEvent': () => void;
+  'methodThatFiresMyWindowEvent': (value: number) => void;
+}
+interface EventCmpAttributes extends JSXElements.HTMLAttributes {
+  'onMy-event-with-options'?: (event: CustomEvent<{ mph: number }>) => void;
+  'onMyEvent'?: (event: CustomEvent<boolean>) => void;
+  'onMyWindowEvent'?: (event: CustomEvent<number>) => void;
+}
 
-  interface ListenCmp {
-    'opened': boolean;
-  }
-  interface ListenCmpAttributes extends JSXElements.HTMLAttributes {
-    'opened'?: boolean;
-  }
+interface ListenCmp {
+  'opened': boolean;
+}
+interface ListenCmpAttributes extends JSXElements.HTMLAttributes {
+  'opened'?: boolean;
+}
 
-  interface PropCmp {
-    'first': string;
-    'lastName': string;
-  }
-  interface PropCmpAttributes extends JSXElements.HTMLAttributes {
-    'first'?: string;
-    'lastName'?: string;
-  }
+interface PropCmp {
+  'first': string;
+  'lastName': string;
+}
+interface PropCmpAttributes extends JSXElements.HTMLAttributes {
+  'first'?: string;
+  'lastName'?: string;
+}
 
-  interface StateCmp {}
-  interface StateCmpAttributes extends JSXElements.HTMLAttributes {}
+interface StateCmp {}
+interface StateCmpAttributes extends JSXElements.HTMLAttributes {}
+
+export interface LocalElementInterfaces  {
+  'ElementCmp': ElementCmp;
+  'EventCmp': EventCmp;
+  'ListenCmp': ListenCmp;
+  'PropCmp': PropCmp;
+  'StateCmp': StateCmp;
 }
 
 export interface LocalIntrinsicElements {
-  'element-cmp': StencilComponents.ElementCmpAttributes;
-  'event-cmp': StencilComponents.EventCmpAttributes;
-  'listen-cmp': StencilComponents.ListenCmpAttributes;
-  'prop-cmp': StencilComponents.PropCmpAttributes;
-  'state-cmp': StencilComponents.StateCmpAttributes;
+  'element-cmp': ElementCmpAttributes;
+  'event-cmp': EventCmpAttributes;
+  'listen-cmp': ListenCmpAttributes;
+  'prop-cmp': PropCmpAttributes;
+  'state-cmp': StateCmpAttributes;
 }
 
 declare global {
 
-  interface HTMLElementCmpElement extends StencilComponents.ElementCmp, HTMLStencilElement {}
+  interface HTMLElementCmpElement extends ElementCmp, HTMLStencilElement {}
   var HTMLElementCmpElement: {
     prototype: HTMLElementCmpElement;
     new (): HTMLElementCmpElement;
   };
 
-  interface HTMLEventCmpElement extends StencilComponents.EventCmp, HTMLStencilElement {}
+  interface HTMLEventCmpElement extends EventCmp, HTMLStencilElement {}
   var HTMLEventCmpElement: {
     prototype: HTMLEventCmpElement;
     new (): HTMLEventCmpElement;
   };
 
-  interface HTMLListenCmpElement extends StencilComponents.ListenCmp, HTMLStencilElement {}
+  interface HTMLListenCmpElement extends ListenCmp, HTMLStencilElement {}
   var HTMLListenCmpElement: {
     prototype: HTMLListenCmpElement;
     new (): HTMLListenCmpElement;
   };
 
-  interface HTMLPropCmpElement extends StencilComponents.PropCmp, HTMLStencilElement {}
+  interface HTMLPropCmpElement extends PropCmp, HTMLStencilElement {}
   var HTMLPropCmpElement: {
     prototype: HTMLPropCmpElement;
     new (): HTMLPropCmpElement;
   };
 
-  interface HTMLStateCmpElement extends StencilComponents.StateCmp, HTMLStencilElement {}
+  interface HTMLStateCmpElement extends StateCmp, HTMLStencilElement {}
   var HTMLStateCmpElement: {
     prototype: HTMLStateCmpElement;
     new (): HTMLStateCmpElement;

@@ -36,7 +36,7 @@ export async function newPage() {
     throw new Error(`invalid jest environment for stencil puppeteer testing`);
   }
 
-  const page: puppeteer.Page = await global.__PUPPETEER_NEW_PAGE__();
+  const page: TestPage = await global.__PUPPETEER_NEW_PAGE__();
 
   Object.defineProperty(page, 'flush', {
     value: async function () {
@@ -67,13 +67,98 @@ export async function newPage() {
       html
     ];
 
-    await page.evaluateOnNewDocument(() => {
-      window.addEventListener('appload', () => {
-        (window as any).stencilTestAppLoaded = true;
+    const waitForEvents: WaitForEvent[] = [];
+
+    await page.exposeFunction('stencilOnEvent', (browserEvent: BrowserContextEvent) => {
+      const waitData = waitForEvents.find(waitData => {
+        return (
+          waitData.selector === browserEvent.selector &&
+          waitData.eventName === browserEvent.eventName
+        );
       });
+
+      if (waitData) {
+        waitData.resolve(browserEvent.event);
+      }
     });
 
-    const appLoaded = page.waitForFunction('window.stencilTestAppLoaded');
+    page.waitForEvent = (selector, eventName, opts = {}) => {
+      // NODE CONTEXT
+      return new Promise<any>(async (resolve, reject) => {
+        const timeout = (typeof opts.timeout === 'number' ? opts.timeout : 30000);
+
+        const cancelRejectId = setTimeout(reject, timeout);
+
+        waitForEvents.push({
+          selector: selector,
+          eventName: eventName,
+          resolve: resolve,
+          cancelRejectId: cancelRejectId
+        });
+
+        if (selector === 'window') {
+          await page.evaluate(eventName => {
+            // BROWSER CONTEXT
+            window.addEventListener(eventName, ev => {
+              (window as BrowserWindow).stencilOnEvent({
+                selector: 'window',
+                eventName: eventName,
+                event: (window as BrowserWindow).stencilSerializeEvent(ev)
+              });
+            });
+          }, eventName);
+        }
+      });
+    };
+
+    // resolves once the stencil app has finished loading
+    const appLoaded = page.waitForFunction('window.stencilAppLoaded');
+
+    await page.evaluateOnNewDocument(() => {
+      // BROWSER CONTEXT
+      // add a listener for when the app has loaded
+      window.addEventListener('appload', () => {
+        (window as BrowserWindow).stencilAppLoaded = true;
+      });
+
+      (window as BrowserWindow).stencilSerializeEventTarget = (target: any) => {
+        if (!target) {
+          return null;
+        }
+        if (target === window) {
+          return { serializedWindow: true };
+        }
+        if (target === document) {
+          return { serializedDocument: true };
+        }
+        if (target.tagName) {
+          return {
+            tagName: target.tagName,
+            serializedElement: true
+          };
+        }
+        return null;
+      };
+
+      (window as BrowserWindow).stencilSerializeEvent = (orgEv: any) => {
+        return {
+          bubbles: orgEv.bubbles,
+          cancelBubble: orgEv.cancelBubble,
+          cancelable: orgEv.cancelable,
+          composed: orgEv.composed,
+          currentTarget: (window as BrowserWindow).stencilSerializeEventTarget(orgEv.currentTarget),
+          defaultPrevented: orgEv.defaultPrevented,
+          detail: orgEv.detail,
+          eventPhase: orgEv.eventPhase,
+          isTrusted: orgEv.isTrusted,
+          returnValue: orgEv.returnValue,
+          srcElement: (window as BrowserWindow).stencilSerializeEventTarget(orgEv.srcElement),
+          target: (window as BrowserWindow).stencilSerializeEventTarget(orgEv.target),
+          timeStamp: orgEv.timeStamp,
+          type: orgEv.type
+        };
+      };
+    });
 
     await page.goto(url.join(''), {
       waitUntil: 'load'
@@ -83,6 +168,26 @@ export async function newPage() {
   };
 
   return page;
+}
+
+interface WaitForEvent {
+  selector: string;
+  eventName: string;
+  resolve: (ev: any) => void;
+  cancelRejectId: any;
+}
+
+interface BrowserContextEvent {
+  selector: string;
+  eventName: string;
+  event: any;
+}
+
+interface BrowserWindow extends Window {
+  stencilOnEvent(ev: BrowserContextEvent): void;
+  stencilSerializeEvent(ev: CustomEvent): any;
+  stencilSerializeEventTarget(target: any): any;
+  stencilAppLoaded: boolean;
 }
 
 
@@ -113,4 +218,9 @@ export async function connectBrowser() {
   };
 
   return await puppeteer.connect(connectOpts);
+}
+
+
+export interface TestPage extends puppeteer.Page {
+  waitForEvent(selector: 'window' | 'document' | string, eventName: string, opts?: { timeout?: number }): Promise<any>;
 }

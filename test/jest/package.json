@@ -3,10 +3,10 @@
   "private": true,
   "scripts": {
     "start": "node ../../bin/stencil build --debug --watch --dev --serve",
-    "test": "node ../../node_modules/.bin/jest --no-cache --debug"
+    "test": "node ../../node_modules/.bin/jest --no-cache --debug --detectOpenHandles"
   },
   "jest": {
     "preset": "../../testing/jest-preset.js",
-    "testRegex": "element.spec.ts"
+    "testRegex": "event.spec.ts"
   }
 }
