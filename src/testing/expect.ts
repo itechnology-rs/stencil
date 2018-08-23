@@ -3,6 +3,20 @@ import { parseFragment } from './parse-html';
 import { serialize } from './mock-doc/serialize-node';
 
 
+declare global {
+  namespace jest {
+    interface Matchers<R> {
+      toEqualHtml(html: string): void;
+      toHaveClasses(classlist: string[]): void;
+      toMatchClasses(classlist: string[]): void;
+      toHaveAttributes(attributes: { [attr: string]: string }): void;
+      toMatchAttributes(attributes: { [attr: string]: string }): void;
+      toHaveProperties(properties: { [prop: string]: any }): void;
+    }
+  }
+}
+
+
 export function toEqualHtml(a: string, b: string) {
   const parseA = parseFragment(a);
   const parseB = parseFragment(b);
