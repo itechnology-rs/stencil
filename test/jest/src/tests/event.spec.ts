@@ -34,16 +34,18 @@ describe('@Event', () => {
     expect(myWindowEvent.cancelBubble).toEqual(false);
     expect(myWindowEvent.cancelable).toEqual(true);
     expect(myWindowEvent.composed).toEqual(true);
-    expect(myWindowEvent.currentTarget).toEqual({ serializedWindow: true });
     expect(myWindowEvent.defaultPrevented).toEqual(false);
     expect(myWindowEvent.detail).toEqual(88);
     expect(myWindowEvent.eventPhase).toEqual(3);
     expect(myWindowEvent.isTrusted).toEqual(false);
     expect(myWindowEvent.returnValue).toEqual(true);
-    expect(myWindowEvent.srcElement).toEqual({ serializedElement: true, tagName: 'EVENT-CMP' });
-    expect(myWindowEvent.target).toEqual({ serializedElement: true, tagName: 'EVENT-CMP' });
     expect(myWindowEvent.timeStamp).toBeDefined();
     expect(myWindowEvent.type).toEqual('myWindowEvent');
+
+    // notice these are mocked objects, not the actual window, document or HTML Element
+    expect(myWindowEvent.currentTarget).toEqual({ serializedWindow: true });
+    expect(myWindowEvent.srcElement).toEqual({ serializedElement: true, tagName: 'EVENT-CMP' });
+    expect(myWindowEvent.target).toEqual({ serializedElement: true, tagName: 'EVENT-CMP' });
   });
 
   it('should fire custom event on document', async () => {
