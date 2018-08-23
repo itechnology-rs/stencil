@@ -7,7 +7,7 @@ describe('@Event', () => {
     // create a new puppeteer page
     const page = await newPage();
 
-    // load the page with content
+    // load the page with html content
     await page.setContent(`
       <event-cmp></event-cmp>
     `);
@@ -42,7 +42,8 @@ describe('@Event', () => {
     expect(myWindowEvent.timeStamp).toBeDefined();
     expect(myWindowEvent.type).toEqual('myWindowEvent');
 
-    // notice these are mocked objects, not the actual window, document or HTML Element
+    // notice these are mocked objects, not the actual window, document or HTML Element objects
+    // since the event is serialized between node and the browser they need to be mocked
     expect(myWindowEvent.currentTarget).toEqual({ serializedWindow: true });
     expect(myWindowEvent.srcElement).toEqual({ serializedElement: true, tagName: 'EVENT-CMP' });
     expect(myWindowEvent.target).toEqual({ serializedElement: true, tagName: 'EVENT-CMP' });

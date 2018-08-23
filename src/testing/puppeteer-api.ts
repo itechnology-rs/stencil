@@ -38,11 +38,9 @@ export async function newPage() {
 
   const page: TestPage = await global.__PUPPETEER_NEW_PAGE__();
 
-  Object.defineProperty(page, 'flush', {
-    value: async function () {
-      console.log('flush');
-    }
-  });
+  page.waitForQueue = () => {
+    return waitForQueue(page);
+  };
 
   page.on('pageerror', (e) => {
     console.error('pageerror', e);
@@ -141,6 +139,7 @@ function waitForEvent(page: TestPage, waitForEvents: WaitForEvent[], selector: s
   });
 }
 
+
 function nodeContextEvents(waitForEvents: WaitForEvent[], browserEvent: BrowserContextEvent) {
   // NODE CONTEXT
   const waitForEventData = waitForEvents.find(waitData => {
@@ -207,6 +206,15 @@ function browserContextEvents() {
 }
 
 
+async function waitForQueue(page: TestPage) {
+  await page.evaluate(() => {
+    return new Promise(resolve => {
+      window.requestAnimationFrame(resolve);
+    });
+  });
+}
+
+
 interface WaitForEvent {
   selector: string;
   eventName: string;
@@ -260,6 +268,7 @@ export async function connectBrowser() {
 
 export interface TestPage extends puppeteer.Page {
   waitForEvent(selector: 'window' | 'document' | string, eventName: string, opts?: WaitForEventOptions): Promise<CustomEvent>;
+  waitForQueue(): Promise<void>;
 }
 
 export interface WaitForEventOptions {
