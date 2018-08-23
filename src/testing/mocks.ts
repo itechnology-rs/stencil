@@ -8,11 +8,9 @@ import { createRendererPatch } from '../renderer/vdom/patch';
 import { initComponentInstance } from '../core/init-component-instance';
 import { initHostElement } from '../core/init-host-element';
 import { InMemoryFileSystem } from '../util/in-memory-fs';
-import { MockComment } from './mocks/mock-comment';
-import { MockElement } from './mocks/mock-element';
-import { MockDocument } from './mocks/mock-document';
-import { MockTextNode } from './mocks/mock-text-node';
-import { MockWindow } from './mocks/mock-window';
+import { MockCustomEvent } from './mock-doc/event';
+import { MockDocument } from './mock-doc/document';
+import { MockWindow } from './mock-doc/window';
 import { TestingConfig } from './testing-config';
 import { TestingFs } from './testing-fs';
 import { TestingLogger } from './testing-logger';
@@ -25,36 +23,13 @@ export function mockWindow() {
   return (win as any) as Window;
 }
 
-export function mockDocument() {
-  const doc = new MockDocument();
+export function mockDocument(html?: string) {
+  const doc = new MockDocument(html);
   return (doc as any) as Document;
 }
 
-export function mockElement<K extends keyof HTMLElementTagNameMap>(tagName?: K) {
-  const elm = new MockElement(tagName || 'div');
-  return (elm as any) as K;
-}
-
-export function mockElementNS(namespaceURI: string, name: string) {
-  const elm = new MockElement(name);
-  elm.namespaceURI = namespaceURI;
-  return (elm as any) as HTMLElement;
-}
-
-export function mockSvgElement() {
-  const elm = new MockElement('svg');
-  elm.namespaceURI = 'http://www.w3.org/2000/svg';
-  return (elm as any) as SVGElement;
-}
-
-export function mockTextNode(text: string) {
-  const textNode = new MockTextNode(text);
-  return (textNode as any) as Text;
-}
-
-export function mockComment(text: string) {
-  const commentNode = new MockComment(text);
-  return (commentNode as any) as Comment;
+export interface MockHTMLElementTagNameMap extends HTMLElementTagNameMap {
+  [tagName: string]: HTMLElement;
 }
 
 
@@ -66,7 +41,7 @@ export function mockPlatform(win?: any, domApi?: d.DomApi, cmpRegistry?: d.Compo
   const config = mockConfig();
   const outputTarget = config.outputTargets[0] as d.OutputTargetWww;
 
-  win = win || config.sys.createDom().parse({type: 'www', html: ''});
+  win = win || mockWindow();
   domApi = domApi || createDomApi(App, win, win.document);
   cmpRegistry = cmpRegistry || {};
 
@@ -208,11 +183,6 @@ export function mockQueue() {
 }
 
 
-export function mockHtml(_html: string): HTMLHtmlElement {
-  throw new Error('todo! hey, do the thing here');
-}
-
-
 export function mockComponentInstance(plt: d.PlatformApi, domApi: d.DomApi, cmpMeta: d.ComponentMeta = {}): d.ComponentInstance {
   mockDefine(plt, cmpMeta);
 
@@ -243,27 +213,21 @@ export function mockDefine(plt: MockedPlatform, cmpMeta: d.ComponentMeta) {
   return cmpMeta;
 }
 
-export function mockEvent(domApi: d.DomApi, name: string, detail: any = {}): CustomEvent {
-  const evt = (domApi.$doc.documentElement.parentNode as Document).createEvent('CustomEvent');
-  evt.initCustomEvent(name, false, false, detail);
-  return evt;
+export function mockDispatchEvent(elm: HTMLElement, name: string, detail: any = {}): boolean {
+  const ev = new MockCustomEvent(name, detail);
+  return elm.dispatchEvent(ev as any);
 }
 
-export function mockDispatchEvent(domApi: d.DomApi, el: HTMLElement, name: string, detail: any = {}): boolean {
-  const ev = mockEvent(domApi, name, detail);
-  return el.dispatchEvent(ev);
-}
+export async function mockConnect(plt: MockedPlatform, html: string) {
+  const tmp = plt.domApi.$doc.createElement('div');
+  tmp.innerHTML = html;
+  const rootNode = tmp.firstElementChild as any;
 
-export async function mockConnect(_plt: MockedPlatform, _html: string) {
-  throw new Error('we still need this?');
-  // const jsdom = require('jsdom');
-  // const rootNode = jsdom.JSDOM.fragment(html);
+  connectComponents(plt, rootNode);
 
-  // connectComponents(plt, rootNode);
+  await plt.$flushQueue();
 
-  // await plt.$flushQueue();
-
-  // return rootNode;
+  return rootNode;
 }
 
 
@@ -289,7 +253,7 @@ function connectComponents(plt: MockedPlatform, node: d.HostElement) {
 
 
 export async function waitForLoad(plt: MockedPlatform, rootNode: any, tag: string) {
-  const elm: d.HostElement = rootNode.tagName === tag.toLowerCase() ? rootNode : rootNode.querySelector(tag);
+  const elm: d.HostElement = rootNode.nodeName.toLowerCase() === tag.toLowerCase() ? rootNode : rootNode.querySelector(tag);
 
     // flush to read attribute mode on host elment
   await plt.$flushQueue();
