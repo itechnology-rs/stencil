@@ -15,12 +15,12 @@ interface ElementCmpAttributes extends JSXElements.HTMLAttributes {}
 
 interface EventCmp {
   'methodThatFiresEventWithOptions': () => void;
-  'methodThatFiresMyEvent': () => void;
+  'methodThatFiresMyDocumentEvent': () => void;
   'methodThatFiresMyWindowEvent': (value: number) => void;
 }
 interface EventCmpAttributes extends JSXElements.HTMLAttributes {
   'onMy-event-with-options'?: (event: CustomEvent<{ mph: number }>) => void;
-  'onMyEvent'?: (event: CustomEvent<boolean>) => void;
+  'onMyDocumentEvent'?: (event: CustomEvent<any>) => void;
   'onMyWindowEvent'?: (event: CustomEvent<number>) => void;
 }
 

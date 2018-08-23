@@ -5,7 +5,7 @@ import { Component, Event, EventEmitter, Method } from '../../../dist/index';
 })
 export class EventCmp {
 
-  @Event() myEvent: EventEmitter<boolean>;
+  @Event() myDocumentEvent: EventEmitter<any>;
 
   @Event({
     eventName: 'my-event-with-options',
@@ -17,17 +17,18 @@ export class EventCmp {
 
   @Method()
   methodThatFiresMyWindowEvent(value: number) {
-    console.log('methodThatFiresMyWindowEvent', value)
+    console.log('methodThatFiresMyWindowEvent()', value);
     this.myWindowEvent.emit(value);
   }
 
   @Method()
-  methodThatFiresMyEvent() {
-    this.myEvent.emit(true);
+  methodThatFiresMyDocumentEvent() {
+    this.myDocumentEvent.emit();
   }
 
   @Method()
   methodThatFiresEventWithOptions() {
+    console.log('methodThatFiresEventWithOptions()');
     this.myEventWithOptions.emit({ mph: 88 });
   }
 

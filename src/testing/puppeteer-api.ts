@@ -58,6 +58,7 @@ export async function newPage() {
   });
 
   page.setContent = async (html: string) => {
+    // NODE CONTEXT
     const env: d.JestProcessEnv = process.env;
     const loaderUrl = env.__STENCIL_TEST_LOADER_SCRIPT_URL__;
 
@@ -70,105 +71,141 @@ export async function newPage() {
     const waitForEvents: WaitForEvent[] = [];
 
     await page.exposeFunction('stencilOnEvent', (browserEvent: BrowserContextEvent) => {
-      const waitData = waitForEvents.find(waitData => {
-        return (
-          waitData.selector === browserEvent.selector &&
-          waitData.eventName === browserEvent.eventName
-        );
-      });
-
-      if (waitData) {
-        waitData.resolve(browserEvent.event);
-      }
+      // NODE CONTEXT
+      nodeContextEvents(waitForEvents, browserEvent);
     });
 
     page.waitForEvent = (selector, eventName, opts = {}) => {
       // NODE CONTEXT
-      return new Promise<any>(async (resolve, reject) => {
-        const timeout = (typeof opts.timeout === 'number' ? opts.timeout : 30000);
-
-        const cancelRejectId = setTimeout(reject, timeout);
-
-        waitForEvents.push({
-          selector: selector,
-          eventName: eventName,
-          resolve: resolve,
-          cancelRejectId: cancelRejectId
-        });
-
-        if (selector === 'window') {
-          await page.evaluate(eventName => {
-            // BROWSER CONTEXT
-            window.addEventListener(eventName, ev => {
-              (window as BrowserWindow).stencilOnEvent({
-                selector: 'window',
-                eventName: eventName,
-                event: (window as BrowserWindow).stencilSerializeEvent(ev)
-              });
-            });
-          }, eventName);
-        }
-      });
+      return waitForEvent(page, waitForEvents, selector, eventName, opts);
     };
 
     // resolves once the stencil app has finished loading
     const appLoaded = page.waitForFunction('window.stencilAppLoaded');
 
-    await page.evaluateOnNewDocument(() => {
-      // BROWSER CONTEXT
-      // add a listener for when the app has loaded
-      window.addEventListener('appload', () => {
-        (window as BrowserWindow).stencilAppLoaded = true;
-      });
+    await page.evaluateOnNewDocument(browserContextEvents);
 
-      (window as BrowserWindow).stencilSerializeEventTarget = (target: any) => {
-        if (!target) {
-          return null;
-        }
-        if (target === window) {
-          return { serializedWindow: true };
-        }
-        if (target === document) {
-          return { serializedDocument: true };
-        }
-        if (target.tagName) {
-          return {
-            tagName: target.tagName,
-            serializedElement: true
-          };
-        }
-        return null;
-      };
-
-      (window as BrowserWindow).stencilSerializeEvent = (orgEv: any) => {
-        return {
-          bubbles: orgEv.bubbles,
-          cancelBubble: orgEv.cancelBubble,
-          cancelable: orgEv.cancelable,
-          composed: orgEv.composed,
-          currentTarget: (window as BrowserWindow).stencilSerializeEventTarget(orgEv.currentTarget),
-          defaultPrevented: orgEv.defaultPrevented,
-          detail: orgEv.detail,
-          eventPhase: orgEv.eventPhase,
-          isTrusted: orgEv.isTrusted,
-          returnValue: orgEv.returnValue,
-          srcElement: (window as BrowserWindow).stencilSerializeEventTarget(orgEv.srcElement),
-          target: (window as BrowserWindow).stencilSerializeEventTarget(orgEv.target),
-          timeStamp: orgEv.timeStamp,
-          type: orgEv.type
-        };
-      };
-    });
-
+    // NODE CONTEXT
     await page.goto(url.join(''), {
       waitUntil: 'load'
     });
 
+    // NODE CONTEXT
     await appLoaded;
   };
 
   return page;
 }
+
+
+function waitForEvent(page: TestPage, waitForEvents: WaitForEvent[], selector: string, eventName: string, opts: WaitForEventOptions) {
+  // NODE CONTEXT
+  return new Promise<any>(async (resolve, reject) => {
+    const timeout = (typeof opts.timeout === 'number' ? opts.timeout : 30000);
+
+    const cancelRejectId = setTimeout(reject, timeout);
+
+    waitForEvents.push({
+      selector: selector,
+      eventName: eventName,
+      resolve: resolve,
+      cancelRejectId: cancelRejectId
+    });
+
+    if (selector === 'window' || selector === 'document') {
+      // add window or document event listener
+      await page.evaluate((selector, eventName) => {
+        // BROWSER CONTEXT
+        (selector === 'document' ? document : window).addEventListener(eventName, (ev: any) => {
+          (window as BrowserWindow).stencilOnEvent({
+            selector: selector,
+            eventName: eventName,
+            event: (window as BrowserWindow).stencilSerializeEvent(ev)
+          });
+        });
+      }, selector, eventName);
+
+    } else {
+      // add element event listener
+      await page.$eval(selector, (elm: any, selector: string, eventName: string) => {
+        // BROWSER CONTEXT
+        elm.addEventListener(eventName, (ev: any) => {
+          (window as BrowserWindow).stencilOnEvent({
+            selector: selector,
+            eventName: eventName,
+            event: (window as BrowserWindow).stencilSerializeEvent(ev)
+          });
+        });
+      }, selector, eventName);
+    }
+  });
+}
+
+function nodeContextEvents(waitForEvents: WaitForEvent[], browserEvent: BrowserContextEvent) {
+  // NODE CONTEXT
+  const waitForEventData = waitForEvents.find(waitData => {
+    return (
+      waitData.selector === browserEvent.selector &&
+      waitData.eventName === browserEvent.eventName
+    );
+  });
+
+  if (waitForEventData) {
+    clearTimeout(waitForEventData.cancelRejectId);
+    waitForEventData.resolve(browserEvent.event);
+  }
+}
+
+
+function browserContextEvents() {
+  // BROWSER CONTEXT
+
+  window.addEventListener('appload', () => {
+    // BROWSER CONTEXT
+    (window as BrowserWindow).stencilAppLoaded = true;
+  });
+
+  (window as BrowserWindow).stencilSerializeEventTarget = (target: any) => {
+    // BROWSER CONTEXT
+    if (!target) {
+      return null;
+    }
+    if (target === window) {
+      return { serializedWindow: true };
+    }
+    if (target === document) {
+      return { serializedDocument: true };
+    }
+    if (target.tagName) {
+      return {
+        tagName: target.tagName,
+        serializedElement: true
+      };
+    }
+    return null;
+  };
+
+  (window as BrowserWindow).stencilSerializeEvent = (orgEv: any) => {
+    // BROWSER CONTEXT
+    return {
+      bubbles: orgEv.bubbles,
+      cancelBubble: orgEv.cancelBubble,
+      cancelable: orgEv.cancelable,
+      composed: orgEv.composed,
+      currentTarget: (window as BrowserWindow).stencilSerializeEventTarget(orgEv.currentTarget),
+      defaultPrevented: orgEv.defaultPrevented,
+      detail: orgEv.detail,
+      eventPhase: orgEv.eventPhase,
+      isTrusted: orgEv.isTrusted,
+      returnValue: orgEv.returnValue,
+      srcElement: (window as BrowserWindow).stencilSerializeEventTarget(orgEv.srcElement),
+      target: (window as BrowserWindow).stencilSerializeEventTarget(orgEv.target),
+      timeStamp: orgEv.timeStamp,
+      type: orgEv.type
+    };
+  };
+}
+
 
 interface WaitForEvent {
   selector: string;
@@ -222,5 +259,9 @@ export async function connectBrowser() {
 
 
 export interface TestPage extends puppeteer.Page {
-  waitForEvent(selector: 'window' | 'document' | string, eventName: string, opts?: { timeout?: number }): Promise<any>;
+  waitForEvent(selector: 'window' | 'document' | string, eventName: string, opts?: WaitForEventOptions): Promise<CustomEvent>;
+}
+
+export interface WaitForEventOptions {
+  timeout?: number;
 }
