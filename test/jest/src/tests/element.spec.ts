@@ -14,8 +14,8 @@ describe('@Element', () => {
 
     // select the "element-cmp" element within the page (same as querySelector)
     // and once it's received, then return the element's "textContent" property
-    // since we used "await", the expect's "toEqual()" receives a normal string to verify
-    expect(await page.$eval('element-cmp', elm => elm.textContent)).toEqual('Hello, my name is Marty McFly');
+    const textContent = await page.$eval('element-cmp', elm => elm.textContent);
+    expect(textContent).toEqual('Hello, my name is Marty McFly');
   });
 
 });
