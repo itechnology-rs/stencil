@@ -68,7 +68,7 @@ export async function newPage() {
     ];
 
     await page.evaluateOnNewDocument(() => {
-      window.addEventListener('appload', e => {
+      window.addEventListener('appload', () => {
         (window as any).stencilTestAppLoaded = true;
       });
     });
