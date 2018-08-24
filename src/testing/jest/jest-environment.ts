@@ -1,8 +1,8 @@
-import * as d from '../declarations';
-import * as customExpect from './expect';
-import { connectBrowser, newBrowserPage } from './puppeteer-api';
-import { getDefaultBuildConditionals } from '../build-conditionals';
-import { spyOnEvent } from './utils';
+import * as d from '../../declarations';
+import * as customExpect from '../expect';
+import { connectBrowser, newBrowserPage } from '../puppeteer/puppeteer-browser';
+import { getDefaultBuildConditionals } from '../../build-conditionals';
+import { spyOnEvent } from '../utils';
 const NodeEnvironment = require('jest-environment-node');
 
 

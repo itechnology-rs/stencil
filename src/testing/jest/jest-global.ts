@@ -1,6 +1,6 @@
-import { setupTestConfig } from './test-config';
-import { setupTestPuppeteer, teardownTestPuppeteer } from './puppeteer-api';
-import { setupTestApp, teardownTestApp } from './test-app';
+import { setupTestConfig } from '../test-config';
+import { setupTestPuppeteer, teardownTestPuppeteer } from '../puppeteer/puppeteer-browser';
+import { setupTestApp, teardownTestApp } from '../test-app';
 
 
 export async function jestGlobalSetup() {

@@ -7,6 +7,6 @@
   },
   "jest": {
     "preset": "../../testing/jest-preset.js",
-    "testRegex": ".*\\.spec\\.(ts|tsx|js)$"
+    "testRegex": "src/tests/element.spec.ts"
   }
 }

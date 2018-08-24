@@ -1,4 +1,4 @@
-import * as d from '../declarations';
+import * as d from '../../declarations';
 import * as ts from 'typescript';
 const testing = require('./index.js');
 
