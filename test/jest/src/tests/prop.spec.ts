@@ -1,12 +1,15 @@
-import { newPage } from '../../../../dist/testing';
+import { newPage, TestPage } from '../../../../dist/testing';
 
 
 describe('@Prop', () => {
 
+  let page: TestPage;
+  beforeEach(async () => {
+    page = await newPage();
+  });
+
   it('should set props from property', async () => {
     // create a new puppeteer page
-    const page = await newPage();
-
     // load the page with html content
     await page.setContent(`
       <prop-cmp></prop-cmp>
@@ -31,13 +34,13 @@ describe('@Prop', () => {
     expect(textContent).toEqual('Hello, my name is Marty McFly');
   });
 
-  // it('should set props from attributes', async () => {
-  //   const window = new TestWindow();
-  //   const element = await window.load({
-  //     components: [PropCmp],
-  //     html: '<prop-cmp first="Marty" last-name="McFly"></prop-cmp>'
-  //   });
-  //   expect(element.textContent).toEqual('Hello, my name is Marty McFly');
-  // });
+  it('should set props from attributes', async () => {
+    await page.setContent(`
+      <prop-cmp first="Marty" last-name="McFly"></prop-cmp>
+    `);
+
+    const textContent = await page.$eval('prop-cmp', elm => elm.textContent);
+    expect(textContent).toEqual('Hello, my name is Marty McFly');
+  });
 
 });
