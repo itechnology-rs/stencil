@@ -1,16 +1,19 @@
-// import { TestWindow } from '../../dist/testing/index';
-// import { StateCmp } from './fixtures/state-cmp';
+import { newPage } from '../../../../dist/testing';
 
 
-// describe('@State', () => {
+describe('@State', () => {
 
-//   it('should render all weekdays', async () => {
-//     const window = new TestWindow();
-//     const element = await window.load({
-//       components: [StateCmp],
-//       html: '<state-cmp></state-cmp>'
-//     });
-//     expect(element.querySelectorAll('.day-button').length).toEqual(7);
-//   });
+  it('should render all weekdays', async () => {
+    // create a new puppeteer page
+    const page = await newPage();
 
-// });
+    // load the page with html content
+    await page.setContent(`
+      <state-cmp></state-cmp>
+    `);
+
+    const divsCounts = await page.$$eval('.day-button', btns => btns.length);
+    expect(divsCounts).toEqual(7);
+  });
+
+});
