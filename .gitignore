@@ -25,3 +25,5 @@ node_modules/
 /testing
 
 test/e2e/app/components.d.ts
+
+test/jest/www/*
