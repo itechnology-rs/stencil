@@ -65,8 +65,15 @@ function testPackage(testPkg) {
   {
     packageJson: '../testing/package.json',
     exports: [
-      'h',
-      'TestWindow'
+      'JestEnvironment',
+      'jestGlobalSetup',
+      'jestGlobalTeardown',
+      'jestPreprocessor',
+      'jestSetupTestFramework',
+      'mockDocument',
+      'mockWindow',
+      'newPage',
+      'transpile'
     ]
   },
   {
