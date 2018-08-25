@@ -1,16 +1,13 @@
-import { newPage } from '../../../../dist/testing';
+import { newTestPage } from '../../../../dist/testing';
 
 
 describe('@Listen', () => {
 
   it('host listener toggles "opened" from "click" event', async () => {
     // create a new puppeteer page
-    const page = await newPage();
-
-    // load the page with html content
-    await page.setContent(`
+    const page = await newTestPage({ html: `
       <listen-cmp></listen-cmp>
-    `);
+    `});
 
     // select the "event-cmp" element within the page (same as querySelector)
     // and return the value from the component's "opened" @Prop

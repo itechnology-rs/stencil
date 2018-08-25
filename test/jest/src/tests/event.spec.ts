@@ -1,16 +1,14 @@
-import { newPage } from '../../../../dist/testing';
+import { newTestPage } from '../../../../dist/testing';
 
 
 describe('@Event', () => {
 
   it('should fire custom event on window', async () => {
     // create a new puppeteer page
-    const page = await newPage();
-
-    // load the page with html content
-    await page.setContent(`
+    // and load the page with html content
+    const page = await newTestPage({ html: `
       <event-cmp></event-cmp>
-    `);
+    `});
 
     // add an event listener on window BEFORE we fire off the event
     // do not "await" on the event's response since it hasn't been fired yet
@@ -50,11 +48,9 @@ describe('@Event', () => {
   });
 
   it('should fire custom event on document', async () => {
-    const page = await newPage();
-
-    await page.setContent(`
+    const page = await newTestPage({ html: `
       <event-cmp></event-cmp>
-    `);
+    `});
 
     const myDocumentEventPromise = page.waitForEvent('document', 'myDocumentEvent');
 
@@ -79,11 +75,9 @@ describe('@Event', () => {
   });
 
   it('should fire custom event w/ no options', async () => {
-    const page = await newPage();
-
-    await page.setContent(`
+    const page = await newTestPage({ html: `
       <event-cmp></event-cmp>
-    `);
+    `});
 
     const myEventWithOptionsPromise = page.waitForEvent('event-cmp', 'my-event-with-options');
 

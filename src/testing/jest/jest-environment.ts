@@ -17,7 +17,7 @@ export class JestEnvironment extends NodeEnvironment {
   }
 
   async setup() {
-    this.global.__PUPPETEER_NEW_PAGE__ = this.newPuppeteerPage.bind(this);
+    this.global.__NEW_TEST_PAGE__ = this.newPuppeteerPage.bind(this);
   }
 
   async newPuppeteerPage() {

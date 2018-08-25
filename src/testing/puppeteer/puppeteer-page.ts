@@ -8,12 +8,12 @@ import * as puppeteer from 'puppeteer';
 declare const global: d.JestEnvironmentGlobal;
 
 
-export async function newPage() {
-  if (!global.__PUPPETEER_NEW_PAGE__) {
+export async function newTestPage(opts: pd.NewTestPageOptions = {}) {
+  if (!global.__NEW_TEST_PAGE__) {
     throw new Error(`invalid jest environment for stencil puppeteer testing`);
   }
 
-  const page: pd.TestPage = await global.__PUPPETEER_NEW_PAGE__();
+  const page: pd.TestPage = await global.__NEW_TEST_PAGE__();
 
   await initPageEvents(page);
 
@@ -24,13 +24,27 @@ export async function newPage() {
   page.on('console', consoleMessage);
   page.on('pageerror', pageError);
 
-  page.setContent = (html: string) => setContent(page, html);
+  if (typeof opts.html === 'string') {
+    await setTestContent(page, opts.html);
+
+  } else if (typeof opts.url === 'string') {
+    await gotoTest(page, opts.url);
+
+  } else {
+    page.gotoTest = gotoTest.bind(null, page);
+    page.setTestContent = setTestContent.bind(null, page);
+  }
 
   return page;
 }
 
 
-async function setContent(page: pd.TestPage, html: string) {
+async function gotoTest(page: pd.TestPage, url: string, opts?: Partial<puppeteer.NavigationOptions>) {
+  await page.goto(url, opts);
+}
+
+
+async function setTestContent(page: pd.TestPage, html: string) {
   // NODE CONTEXT
   const loaderUrl = (process.env as d.JestProcessEnv).__STENCIL_TEST_LOADER_SCRIPT_URL__;
 

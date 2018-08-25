@@ -15,7 +15,7 @@ declare global {
 
 export interface JestEnvironmentGlobal {
   __BUILD_CONDITIONALS__: any;
-  __PUPPETEER_NEW_PAGE__: () => Promise<any>;
+  __NEW_TEST_PAGE__: () => Promise<any>;
   Context: any;
   loadTestWindow: (testWindow: any) => Promise<void>;
   h: any;

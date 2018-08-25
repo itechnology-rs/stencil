@@ -1,17 +1,20 @@
-import { newPage, TestPage } from '../../../../dist/testing';
+import { newTestPage, TestPage } from '../../../../dist/testing';
 
 
 describe('@Prop', () => {
 
   let page: TestPage;
   beforeEach(async () => {
-    page = await newPage();
+    // example showing how new test pages can be
+    // created within beforeEach(), then using
+    // page.setTestContent() or page.gotoTest()
+    page = await newTestPage();
   });
 
   it('should set props from property', async () => {
     // create a new puppeteer page
     // load the page with html content
-    await page.setContent(`
+    await page.setTestContent(`
       <prop-cmp></prop-cmp>
     `);
 
@@ -34,7 +37,7 @@ describe('@Prop', () => {
   });
 
   it('should set props from attributes', async () => {
-    await page.setContent(`
+    await page.setTestContent(`
       <prop-cmp first="Marty" last-name="McFly"></prop-cmp>
     `);
 

@@ -1,26 +1,10 @@
 import * as puppeteer from 'puppeteer';
 
 
-export interface NavigationOptions {
-  /**
-   * Maximum navigation time in milliseconds, pass 0 to disable timeout.
-   * @default 30000
-   */
-  timeout?: number;
-  /**
-   * When to consider navigation succeeded.
-   * @default load Navigation is consider when the `load` event is fired.
-   */
-  waitUntil?: LoadEvent | LoadEvent[];
+export interface NewTestPageOptions {
+  url?: string;
+  html?: string;
 }
-
-
-export type LoadEvent =
-  | 'appload'
-  | 'load'
-  | 'domcontentloaded'
-  | 'networkidle0'
-  | 'networkidle2';
 
 
 export interface TestPage extends puppeteer.Page {
@@ -31,6 +15,10 @@ export interface TestPage extends puppeteer.Page {
    * @param lightDomSelector Light Dom querySelector
    */
   q(lightDomSelector: string): QueryTestElement;
+
+  gotoTest(url: string, options?: Partial<puppeteer.NavigationOptions>): Promise<puppeteer.Response | null>;
+
+  setTestContent(html: string): Promise<void>;
 
   waitForEvent(selector: 'window' | 'document' | string, eventName: string, opts?: WaitForEventOptions): Promise<CustomEvent>;
   waitForQueue(): Promise<void>;
@@ -49,7 +37,7 @@ export interface QueryTestElement extends TestElementUtils {
 
 
 export interface TestElementUtils {
-  getProperty(propName: string): Promise<any>;
+  getProperty<T>(propName: string): Promise<T>;
   setProperty(propName: string, propValue: any): Promise<void>;
 
   getAttribute(attrName: string): Promise<string>;
