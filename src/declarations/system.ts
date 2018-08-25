@@ -9,6 +9,7 @@ export interface StencilSystem {
     version: string;
     typescriptVersion?: string;
     runtime?: string;
+    packageDir?: string;
   };
   copy?(copyTasks: d.CopyTask[]): Promise<d.CopyResults>;
   createDom?(): CreateDom;

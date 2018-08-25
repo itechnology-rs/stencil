@@ -124,6 +124,6 @@
       "/node_modules",
       "/scripts"
     ],
-    "testRegex": "/Users/adam/git/stencil/src/testing/test/render.spec.ts"
+    "testRegex": "/Users/adam/git/stencil/src/cli/test/parse-flags.spec.ts"
   }
 }

@@ -190,6 +190,12 @@ describe('parseFlags', () => {
     expect(flags.docsJson).toBe('some/path/docs.json');
   });
 
+  it('should parse --e2e', () => {
+    process.argv[2] = '--e2e';
+    const flags = parseFlags(process);
+    expect(flags.e2e).toBe(true);
+  });
+
   it('should parse --es5', () => {
     process.argv[2] = '--es5';
     const flags = parseFlags(process);
@@ -288,6 +294,12 @@ describe('parseFlags', () => {
     process.argv[2] = '--service-worker';
     const flags = parseFlags(process);
     expect(flags.serviceWorker).toBe(true);
+  });
+
+  it('should parse --spec', () => {
+    process.argv[2] = '--spec';
+    const flags = parseFlags(process);
+    expect(flags.spec).toBe(true);
   });
 
   it('should parse --stats', () => {

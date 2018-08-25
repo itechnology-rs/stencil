@@ -3,10 +3,8 @@
   "private": true,
   "scripts": {
     "start": "node ../../bin/stencil build --debug --watch --dev --serve",
-    "test": "node ../../bin/stencil test"
-  },
-  "jest": {
-    "preset": "../../testing/jest-preset.js",
-    "testRegex": ".*\\.spec\\.(ts|tsx|js)$"
+    "test": "node ../../bin/stencil test",
+    "test.e2e": "node ../../bin/stencil test --e2e",
+    "test.spec": "node ../../bin/stencil test --spec"
   }
 }

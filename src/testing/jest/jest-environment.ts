@@ -26,6 +26,10 @@ export class JestEnvironment extends NodeEnvironment {
       this.browser = await connectBrowser();
     }
 
+    if (!this.browser) {
+      return null;
+    }
+
     const page = await newBrowserPage(this.browser);
 
     this.pages.push(page);

@@ -79,12 +79,15 @@ if (success) {
     });
   }
 
+  const screenshotLocalAdapterSrc = path.join(TRANSPILED_DIR, 'testing', 'screenshot', 'screenshot.local.adapter.js');
+  const screenshotLocalAdapterDst = path.join(__dirname, '..', 'testing', 'screenshot.local.adapter.js');
+  fs.copyFileSync(screenshotLocalAdapterSrc, screenshotLocalAdapterDst);
 
   bundleTestingUtils();
 
 
-  process.on('exit', (code) => {
-    fs.removeSync(TRANSPILED_DIR);
+  process.on('exit', () => {
+    // fs.removeSync(TRANSPILED_DIR);
     console.log(`✅ testing: ${DEST_FILE}`);
   });
 

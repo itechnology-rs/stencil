@@ -37,3 +37,13 @@ export interface Testing {
   runTests(): Promise<void>;
   destroy(): Promise<void>;
 }
+
+
+export interface TestingConfig {
+  moduleFileExtensions?: string[];
+  setupTestFrameworkScriptFile?: string;
+  screenshotAdapter?: string;
+  testEnvironment?: string;
+  testPathIgnorePatterns?: string[];
+  transform?: {[key: string]: string };
+}

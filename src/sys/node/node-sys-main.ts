@@ -19,6 +19,7 @@ import * as url from 'url';
 export class NodeSystem implements d.StencilSystem {
   private packageJsonData: d.PackageJsonData;
   private distDir: string;
+  private packageDir: string;
   private sysUtil: any;
   private sysWorker: WorkerManager;
   private typescriptPackageJson: d.PackageJsonData;
@@ -33,21 +34,21 @@ export class NodeSystem implements d.StencilSystem {
     this.fs = fs || new NodeFs();
     this.path = path;
 
-    const rootDir = path.join(__dirname, '..', '..', '..');
-    this.distDir = path.join(rootDir, 'dist');
+    this.packageDir = path.join(__dirname, '..', '..', '..');
+    this.distDir = path.join(this.packageDir, 'dist');
 
     this.sysUtil = require(path.join(this.distDir, 'sys', 'node', 'sys-util.js'));
 
     try {
-      this.packageJsonData = require(path.join(rootDir, 'package.json'));
+      this.packageJsonData = require(path.join(this.packageDir, 'package.json'));
     } catch (e) {
-      throw new Error(`unable to resolve "package.json" from: ${rootDir}`);
+      throw new Error(`unable to resolve "package.json" from: ${this.packageDir}`);
     }
 
     try {
-      this.typescriptPackageJson = require(this.resolveModule(rootDir, 'typescript')) as d.PackageJsonData;
+      this.typescriptPackageJson = require(this.resolveModule(this.packageDir, 'typescript')) as d.PackageJsonData;
     } catch (e) {
-      throw new Error(`unable to resolve "typescript" from: ${rootDir}`);
+      throw new Error(`unable to resolve "typescript" from: ${this.packageDir}`);
     }
 
     this.storage = new NodeStorage(this.fs);
@@ -102,6 +103,7 @@ export class NodeSystem implements d.StencilSystem {
       name: this.packageJsonData.name,
       version: this.packageJsonData.version,
       runtime: path.join(this.distDir, 'compiler', 'index.js'),
+      packageDir: this.packageDir,
       typescriptVersion: this.typescriptPackageJson.version
     };
   }

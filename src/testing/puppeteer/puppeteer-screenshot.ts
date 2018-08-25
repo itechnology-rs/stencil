@@ -4,7 +4,7 @@ import * as pd from './puppeteer-declarations';
 
 export function initScreenshot(page: pd.TestPage) {
   const screenshotConfigPath = (process.env as d.JestProcessEnv).__STENCIL_TEST_SCREENSHOT__;
-  if (typeof screenshotConfigPath !== 'string') {
+  if (!screenshotConfigPath) {
     // screen shot not enabled, so don't bother creating all this
     page.testshot = () => Promise.resolve();
     return;

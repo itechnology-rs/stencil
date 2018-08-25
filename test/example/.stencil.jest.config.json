@@ -1,0 +1,19 @@
+{
+  "moduleFileExtensions": [
+    "ts",
+    "tsx",
+    "js",
+    "json"
+  ],
+  "testPathIgnorePatterns": [
+    "/Users/adam/git/stencil/test/example/.vscode",
+    "/Users/adam/git/stencil/test/example/.stencil",
+    "/Users/adam/git/stencil/test/example/node_modules",
+    "/Users/adam/git/stencil/test/example/www"
+  ],
+  "setupTestFrameworkScriptFile": "/Users/adam/git/stencil/testing/jest.setupframework.js",
+  "testEnvironment": "/Users/adam/git/stencil/testing/jest.environment.js",
+  "transform": {
+    "^.+\\.(ts|tsx)$": "/Users/adam/git/stencil/testing/jest.preprocessor.js"
+  }
+}

@@ -124,9 +124,9 @@ export interface StencilConfig {
   minifyCss?: boolean;
   minifyJs?: boolean;
   preamble?: string;
-  screenshot?: string;
   srcIndexHtml?: string;
   sys?: d.StencilSystem;
+  testing?: d.TestingConfig;
   tsconfig?: string;
   validateTypes?: boolean;
   watch?: boolean;
@@ -192,6 +192,7 @@ export interface ConfigFlags {
   dev?: boolean;
   docs?: boolean;
   docsJson?: string;
+  e2e?: boolean;
   es5?: boolean;
   help?: boolean;
   log?: boolean;
@@ -205,6 +206,7 @@ export interface ConfigFlags {
   screenshot?: boolean;
   serve?: boolean;
   serviceWorker?: boolean;
+  spec?: boolean;
   ssr?: boolean;
   stats?: boolean;
   version?: boolean;

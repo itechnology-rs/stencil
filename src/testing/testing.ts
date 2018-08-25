@@ -11,6 +11,7 @@ export class Testing implements d.Testing {
   config: d.Config;
   devServer: d.DevServer;
   puppeteerBrowser: puppeteer.Browser;
+  jestConfigPath: string;
 
   constructor(config: d.Config) {
     const { Compiler } = require('../compiler/index.js');
@@ -19,6 +20,14 @@ export class Testing implements d.Testing {
     this.config = this.compiler.config;
 
     this.isValid = this.compiler.isValid;
+
+    if (this.isValid) {
+      if (!config.flags.spec && !config.flags.e2e) {
+        config.logger.error(`Testing requires either the --spec or --e2e command line flags, or both. For example, to run unit tests, use the command: stencil test --spec`);
+        this.isValid = false;
+      }
+    }
+
   }
 
   async runTests() {
@@ -28,19 +37,32 @@ export class Testing implements d.Testing {
 
     const compiler = this.compiler;
     const config = this.config;
-    const outputTarget = getOutputTarget(config);
+    const { isValid, outputTarget } = getOutputTarget(config);
+    if (!isValid) {
+      this.isValid = false;
+      return;
+    }
 
-    config.logger.info(config.logger.magenta('testing build'));
+    const msg: string[] = [];
+    if (config.flags.e2e) {
+      msg.push('e2e');
+    }
+    if (config.flags.spec) {
+      msg.push('spec');
+    }
+    config.logger.info(config.logger.magenta(`testing ${msg.join(' and ')} files`));
 
     const startupResults = await Promise.all([
       compiler.build(),
       compiler.startDevServer(),
-      startPuppeteerBrowser(config)
+      startPuppeteerBrowser(config),
+      setupJestConfig(config),
     ]);
 
-    const results = await startupResults[0];
-    this.devServer = await startupResults[1];
-    this.puppeteerBrowser = await startupResults[2];
+    const results = startupResults[0];
+    this.devServer = startupResults[1];
+    this.puppeteerBrowser = startupResults[2];
+    this.jestConfigPath = startupResults[3];
 
     if (!config.watch && hasError(results && results.diagnostics)) {
       await this.destroy();
@@ -54,6 +76,12 @@ export class Testing implements d.Testing {
 
   async destroy() {
     if (this.config) {
+      if (this.jestConfigPath) {
+        try {
+          // await this.config.sys.fs.unlink(this.jestConfigPath);
+        } catch (e) {}
+      }
+
       this.config.sys.destroy();
       this.config = null;
     }
@@ -73,6 +101,19 @@ export class Testing implements d.Testing {
 
 }
 
+
+async function setupJestConfig(config: d.Config) {
+  const jestConfigPath = config.sys.path.join(config.rootDir, STENCIL_JEST_CONFIG);
+
+  await config.sys.fs.writeFile(
+    jestConfigPath,
+    JSON.stringify(config.testing, null, 2)
+  );
+
+  return jestConfigPath;
+}
+
+
 function setupTestingConfig(config: d.Config) {
   config.buildEs5 = false;
   config.devMode = true;
@@ -87,18 +128,21 @@ function setupTestingConfig(config: d.Config) {
 }
 
 function getOutputTarget(config: d.Config) {
+  let isValid = true;
+
   let outputTarget = config.outputTargets.find(o => o.type === 'www') as d.OutputTargetWww;
   if (!outputTarget) {
     outputTarget = config.outputTargets.find(o => o.type === 'dist') as d.OutputTargetWww;
     if (!outputTarget) {
-      throw new Error(`Test missing config output target`);
+      config.logger.error(`Test missing config output target`);
+      isValid = false;
     }
   }
   outputTarget.serviceWorker = null;
 
   config.outputTargets = [outputTarget];
 
-  return outputTarget;
+  return { isValid, outputTarget };
 }
 
 
@@ -118,3 +162,6 @@ function getLoaderScriptUrl(config: d.Config, outputTarget: d.OutputTargetWww, b
 
   return `${browserUrl}/${buildDir}/${getLoaderFileName(config)}`;
 }
+
+
+const STENCIL_JEST_CONFIG = '.stencil.jest.config.json';

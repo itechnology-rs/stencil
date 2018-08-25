@@ -2,10 +2,10 @@ import * as d from '../../declarations';
 import * as puppeteer from 'puppeteer';
 
 
-export async function startPuppeteerBrowser(_config: d.Config) {
-  // sharedGlobalBrowser is only availabe here,
-  // but it not available to jest tests since they'll
-  // be in different threads
+export async function startPuppeteerBrowser(config: d.Config) {
+  if (!config.flags.e2e) {
+    return null;
+  }
 
   // https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md#puppeteerlaunchoptions
   const browser = await puppeteer.launch({
@@ -23,9 +23,14 @@ export async function startPuppeteerBrowser(_config: d.Config) {
 export async function connectBrowser() {
   // the reason we're connecting to the browser from
   // a web socket is because jest probably has us
-  // in a different thread, this is also why this function
-  // cannot use the sharedGlobalBrowser variable
+  // in a different thread, this is also why this
+  // uses process.env for data
   const env: d.JestProcessEnv = process.env;
+
+  const wsEndpoint = env.__STENCIL_TEST_BROWSER_WS_ENDPOINT__;
+  if (!wsEndpoint) {
+    return null;
+  }
 
   const connectOpts: puppeteer.ConnectOptions = {
     browserWSEndpoint: env.__STENCIL_TEST_BROWSER_WS_ENDPOINT__,

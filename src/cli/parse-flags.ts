@@ -127,6 +127,7 @@ const ARG_OPTS = {
     'debug',
     'dev',
     'docs',
+    'e2e',
     'es5',
     'help',
     'log',
@@ -136,6 +137,7 @@ const ARG_OPTS = {
     'prod',
     'serve',
     'skip-node-check',
+    'spec',
     'stats',
     'version',
     'watch'
