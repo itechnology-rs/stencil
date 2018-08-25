@@ -39,14 +39,42 @@ export async function newTestPage(opts: pd.NewTestPageOptions = {}) {
 }
 
 
-async function gotoTest(page: pd.TestPage, url: string, opts?: Partial<puppeteer.NavigationOptions>) {
-  await page.goto(url, opts);
+async function gotoTest(page: pd.TestPage, url: string) {
+  if (typeof url !== 'string') {
+    throw new Error('invalid gotoTest() url');
+  }
+
+  if (!url.startsWith('/')) {
+    throw new Error('gotoTest() url must start with /');
+  }
+
+  const browserUrl = (process.env as d.JestProcessEnv).__STENCIL_TEST_BROWSER_URL__;
+  if (typeof browserUrl !== 'string') {
+    throw new Error('invalid gotoTest() browser url');
+  }
+
+  // resolves once the stencil app has finished loading
+  const appLoaded = page.waitForFunction('window.stencilAppLoaded');
+
+  url = browserUrl + url.substring(1);
+
+  await page.goto(url, {
+    waitUntil: 'load'
+  });
+
+  await appLoaded;
 }
 
 
 async function setTestContent(page: pd.TestPage, html: string) {
-  // NODE CONTEXT
+  if (typeof html !== 'string') {
+    throw new Error('invalid setTestContent() html');
+  }
+
   const loaderUrl = (process.env as d.JestProcessEnv).__STENCIL_TEST_LOADER_SCRIPT_URL__;
+  if (typeof loaderUrl !== 'string') {
+    throw new Error('invalid setTestContent() loader script url');
+  }
 
   const url = [
     `data:text/html;charset=UTF-8,`,
@@ -57,12 +85,10 @@ async function setTestContent(page: pd.TestPage, html: string) {
   // resolves once the stencil app has finished loading
   const appLoaded = page.waitForFunction('window.stencilAppLoaded');
 
-  // NODE CONTEXT
   await page.goto(url.join(''), {
     waitUntil: 'load'
   });
 
-  // NODE CONTEXT
   await appLoaded;
 }
 
