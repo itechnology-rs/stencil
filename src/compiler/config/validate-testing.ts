@@ -3,8 +3,12 @@ import * as d from '../../declarations';
 
 export function validateTesting(config: d.Config) {
   const testing = config.testing = config.testing || {};
-  const path = config.sys.path;
 
+  if (!config.flags || (!config.flags.e2e && !config.flags.spec)) {
+    return;
+  }
+
+  const path = config.sys.path;
 
   if (!Array.isArray(testing.moduleFileExtensions)) {
     testing.moduleFileExtensions = DEFAULT_MODULE_FILE_EXTENSIONS;
@@ -24,7 +28,7 @@ export function validateTesting(config: d.Config) {
 
   if (typeof testing.setupTestFrameworkScriptFile !== 'string') {
     testing.setupTestFrameworkScriptFile = path.join(
-      config.sys.compiler.packageDir, 'testing', 'jest.setupframework.js'
+      config.sys.compiler.packageDir, 'testing', 'jest.setuptest.js'
     );
 
   } else if (!path.isAbsolute(testing.setupTestFrameworkScriptFile)) {
@@ -44,6 +48,26 @@ export function validateTesting(config: d.Config) {
       config.configPath,
       testing.testEnvironment
     );
+  }
+
+  if (Array.isArray(testing.testMatch)) {
+    delete testing.testRegex;
+
+  } else if (typeof testing.testRegex === 'string') {
+    delete testing.testMatch;
+
+  } else {
+    const types: string[] = [];
+    if (config.flags.e2e) {
+      types.push('e2e');
+    }
+    if (config.flags.spec) {
+      types.push('spec');
+    }
+
+    testing.testMatch = [
+      `**/+(*.)+(${types.join('|')}).+(ts|tsx|js)?(x)`
+    ];
   }
 
   testing.transform = testing.transform || {};

@@ -44,6 +44,8 @@ export interface TestingConfig {
   setupTestFrameworkScriptFile?: string;
   screenshotAdapter?: string;
   testEnvironment?: string;
+  testMatch?: string[];
   testPathIgnorePatterns?: string[];
+  testRegex?: string;
   transform?: {[key: string]: string };
 }

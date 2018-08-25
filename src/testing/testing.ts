@@ -2,6 +2,8 @@ import * as d from '../declarations';
 import { getLoaderFileName } from '../compiler/app/app-file-naming';
 import { hasError, normalizePath } from '../compiler/util';
 import { startPuppeteerBrowser } from './puppeteer/puppeteer-browser';
+import * as cp from 'child_process';
+import * as path from 'path';
 import * as puppeteer from 'puppeteer';
 
 
@@ -69,9 +71,27 @@ export class Testing implements d.Testing {
       process.exit(1);
     }
 
-    const env: d.JestProcessEnv = process.env;
-    env.__STENCIL_TEST_BROWSER_URL__ = this.devServer.browserUrl;
-    env.__STENCIL_TEST_LOADER_SCRIPT_URL__ = getLoaderScriptUrl(config, outputTarget, this.devServer.browserUrl);
+    if (this.devServer) {
+      const env: d.JestProcessEnv = process.env;
+      env.__STENCIL_TEST_BROWSER_URL__ = this.devServer.browserUrl;
+      env.__STENCIL_TEST_LOADER_SCRIPT_URL__ = getLoaderScriptUrl(config, outputTarget, this.devServer.browserUrl);
+    }
+
+    await this.runJest(config, this.jestConfigPath);
+  }
+
+  async runJest(config: d.Config, jestConfigPath: string) {
+    const jestPkgJson = config.sys.resolveModule(config.rootDir, 'jest');
+    const jestModuleRoot = path.dirname(jestPkgJson);
+    const jestBinModule = path.join(jestModuleRoot, 'bin', 'jest.js');
+
+    const args = process.argv.slice(2);
+
+    args.push('--config', jestConfigPath);
+
+    cp.fork(jestBinModule, args, {
+      cwd: config.rootDir
+    });
   }
 
   async destroy() {
@@ -103,7 +123,7 @@ export class Testing implements d.Testing {
 
 
 async function setupJestConfig(config: d.Config) {
-  const jestConfigPath = config.sys.path.join(config.rootDir, STENCIL_JEST_CONFIG);
+  const jestConfigPath = path.join(config.rootDir, STENCIL_JEST_CONFIG);
 
   await config.sys.fs.writeFile(
     jestConfigPath,
@@ -147,7 +167,7 @@ function getOutputTarget(config: d.Config) {
 
 
 function getLoaderScriptUrl(config: d.Config, outputTarget: d.OutputTargetWww, browserUrl: string) {
-  let buildDir = config.sys.path.relative(outputTarget.dir, outputTarget.buildDir);
+  let buildDir = path.relative(outputTarget.dir, outputTarget.buildDir);
   buildDir = normalizePath(buildDir);
 
   if (browserUrl.endsWith('/')) {
