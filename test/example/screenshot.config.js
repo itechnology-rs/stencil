@@ -1,11 +1,11 @@
 const fs = require('fs');
 
 
-module.exports = function screenshotPlugin() {
+module.exports = function screenshotConfig() {
 
   return {
 
-    setup() {
+    setupTests(data) {
 
       return {
         snapshotId: 88
@@ -14,11 +14,9 @@ module.exports = function screenshotPlugin() {
 
     screenshot(data) {
 
-
-
     },
 
-    teardown() {
+    teardownTests(data) {
 
     }
 

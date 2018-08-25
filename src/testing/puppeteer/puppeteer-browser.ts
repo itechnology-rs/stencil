@@ -2,34 +2,21 @@ import * as d from '../../declarations';
 import * as puppeteer from 'puppeteer';
 
 
-let sharedGlobalBrowser: puppeteer.Browser = null;
-
-
-export async function setupTestPuppeteer(config: d.Config) {
+export async function startPuppeteerBrowser(_config: d.Config) {
   // sharedGlobalBrowser is only availabe here,
   // but it not available to jest tests since they'll
   // be in different threads
 
   // https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md#puppeteerlaunchoptions
-  sharedGlobalBrowser = await puppeteer.launch({
+  const browser = await puppeteer.launch({
     ignoreHTTPSErrors: true,
     headless: false
   });
 
   const env: d.JestProcessEnv = process.env;
-  env.__STENCIL_TEST_BROWSER_WS_ENDPOINT__ = sharedGlobalBrowser.wsEndpoint();
+  env.__STENCIL_TEST_BROWSER_WS_ENDPOINT__ = browser.wsEndpoint();
 
-  if (typeof config.screenshot === 'string') {
-    env.__STENCIL_TEST_SCREENSHOT__ = config.screenshot;
-  }
-}
-
-
-export async function teardownTestPuppeteer() {
-  if (sharedGlobalBrowser) {
-    await sharedGlobalBrowser.close();
-    sharedGlobalBrowser = null;
-  }
+  return browser;
 }
 
 

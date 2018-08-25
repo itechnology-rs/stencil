@@ -25,9 +25,15 @@ export interface JestEnvironmentGlobal {
 
 
 export interface JestProcessEnv {
-  __STENCIL_TEST_ROOT_DIR__?: string;
   __STENCIL_TEST_BROWSER_URL__?: string;
   __STENCIL_TEST_LOADER_SCRIPT_URL__?: string;
   __STENCIL_TEST_BROWSER_WS_ENDPOINT__?: string;
   __STENCIL_TEST_SCREENSHOT__?: string;
+}
+
+
+export interface Testing {
+  isValid: boolean;
+  runTests(): Promise<void>;
+  destroy(): Promise<void>;
 }
