@@ -46,6 +46,13 @@ jobs:
           at: ~/stencil
       - run: npm run test.dist && npm run test.testing
 
+  test_example:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/stencil
+      - run: npm run test.example -- --maxWorkers=4
+
   test_jest:
     <<: *defaults
     steps:
@@ -87,6 +94,9 @@ workflows:
     jobs:
       - build
       - test_dist:
+          requires:
+            - build
+      - test_example:
           requires:
             - build
       - test_jest:
