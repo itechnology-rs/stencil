@@ -25,3 +25,20 @@ export async function runJest(config: d.Config, jestConfigPath: string) {
     p.once('error', reject);
   });
 }
+
+
+export async function setupJestConfig(config: d.Config) {
+  const jestConfigPath = path.join(config.rootDir, STENCIL_JEST_CONFIG);
+
+  config.logger.debug(`jest config: ${jestConfigPath}`);
+
+  await config.sys.fs.writeFile(
+    jestConfigPath,
+    JSON.stringify(config.testing, null, 2)
+  );
+
+  return jestConfigPath;
+}
+
+
+const STENCIL_JEST_CONFIG = '.stencil.jest.config.json';

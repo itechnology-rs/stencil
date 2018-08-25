@@ -1,8 +1,8 @@
 import * as d from '../../declarations';
 import * as pd from './puppeteer-declarations';
+import { FindTestElement } from './puppeteer-utils';
 import { initPageEvents } from './puppeteer-events';
 import { initScreenshot } from './puppeteer-screenshot';
-import { TestElement } from './puppeteer-utils';
 import * as puppeteer from 'puppeteer';
 
 
@@ -20,7 +20,7 @@ export async function newTestPage(opts: pd.NewTestPageOptions = {}) {
 
   initScreenshot(page);
 
-  page.q = (lightDomSelector) => new TestElement(page, lightDomSelector);
+  page.find = (lightDomSelector) => new FindTestElement(page, lightDomSelector);
 
   page.waitForQueue = waitForQueue.bind(null, page);
 

@@ -2,7 +2,7 @@ import * as pd from './puppeteer-declarations';
 import * as puppeteer from 'puppeteer';
 
 
-export class TestElement implements pd.QueryTestElement {
+export class FindTestElement implements pd.FindTestElement {
   handlePromise: Promise<puppeteer.ElementHandle>;
 
   constructor(private page: pd.TestPage, lightDomSelector: string) {

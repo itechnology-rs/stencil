@@ -11,7 +11,7 @@ describe('@Listen', () => {
 
     // select the "event-cmp" element within the page (same as querySelector)
     // and return the value from the component's "opened" @Prop
-    let opened = await page.q('listen-cmp').getProperty<boolean>('opened');
+    let opened = await page.find('listen-cmp').getProperty<boolean>('opened');
 
     // we just made a change and now the async queue need to process it
     // make sure the queue does its work before we continue
@@ -31,7 +31,7 @@ describe('@Listen', () => {
     await page.waitForQueue();
 
     // let's get the value of "opened" again
-    opened = await page.q('listen-cmp').getProperty<boolean>('opened');
+    opened = await page.find('listen-cmp').getProperty<boolean>('opened');
 
     // test that the event that we manually dispatched correctly
     // triggered the component's @Listen('click') handler which

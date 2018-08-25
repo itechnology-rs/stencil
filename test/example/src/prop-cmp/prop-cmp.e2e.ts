@@ -32,7 +32,7 @@ describe('@Prop', () => {
     await page.waitForQueue();
 
     // select the "prop-cmp" element within the page (same as querySelector)
-    const shadowRootText = await page.q('prop-cmp').shadow('div').getText();
+    const shadowRootText = await page.find('prop-cmp').shadow('div').getText();
     expect(shadowRootText).toEqual('Hello, my name is Marty McFly');
   });
 
@@ -41,7 +41,7 @@ describe('@Prop', () => {
       <prop-cmp first="Marty" last-name="McFly"></prop-cmp>
     `);
 
-    expect(await page.q('prop-cmp').shadow('div').getText()).toEqual('Hello, my name is Marty McFly');
+    expect(await page.find('prop-cmp').shadow('div').getText()).toEqual('Hello, my name is Marty McFly');
   });
 
 });

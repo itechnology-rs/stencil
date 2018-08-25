@@ -14,7 +14,7 @@ export interface TestPage extends puppeteer.Page {
    * within the webpage's light dom.
    * @param lightDomSelector Light Dom querySelector
    */
-  q(lightDomSelector: string): QueryTestElement;
+  find(lightDomSelector: string): FindTestElement;
 
   gotoTest(url: string, options?: Partial<puppeteer.NavigationOptions>): Promise<puppeteer.Response | null>;
 
@@ -27,7 +27,7 @@ export interface TestPage extends puppeteer.Page {
 }
 
 
-export interface QueryTestElement extends TestElementUtils {
+export interface FindTestElement extends TestElementUtils {
   /**
    * Selects an element within the host element's shadow root. Uses
    * "hostElm.shadowRoot.querySelector()" if the "shadowDomSelector"
