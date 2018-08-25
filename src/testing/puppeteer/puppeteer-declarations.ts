@@ -24,19 +24,54 @@ export type LoadEvent =
 
 
 export interface TestPage extends puppeteer.Page {
+  /**
+   * Testing query for one element. Uses queryselector() to
+   * find the first element that matches the selector
+   * within the webpage's light dom.
+   * @param lightDomSelector Light Dom querySelector
+   */
+  q(lightDomSelector: string): QueryTestElement;
 
-  $(selector: string): Promise<TestElementHandle | null>;
-
-  // goto(url: string, options?: NavigationOptions): Promise<puppeteer.Response | null>;
   waitForEvent(selector: 'window' | 'document' | string, eventName: string, opts?: WaitForEventOptions): Promise<CustomEvent>;
   waitForQueue(): Promise<void>;
 }
 
 
-export interface TestElementHandle extends puppeteer.ElementHandle {
-  then(): puppeteer.ElementHandle;
-  attr(attrName: string, attrValue?: string): Promise<string>;
-  text(text?: string): Promise<string>;
+export interface QueryTestElement extends TestElementUtils {
+  /**
+   * Selects an element within the host element's shadow root. Uses
+   * "hostElm.shadowRoot.querySelector()" if the "shadowDomSelector"
+   * argument is supplied. Otherwise it'll use the shadowRoot element itself.
+   * @param shadowDomSelector Shadow Dom querySelector
+   */
+  shadow(shadowDomSelector?: string): TestElementUtils;
+}
+
+
+export interface TestElementUtils {
+  getProperty(propName: string): Promise<any>;
+  setProperty(propName: string, propValue: any): Promise<void>;
+
+  getAttribute(attrName: string): Promise<string>;
+  getAttributes(): Promise<{[attrName: string]: any}>;
+  setAttribute(attrName: string, attrValue?: string): Promise<void>;
+  setAttributes(attrs: { [attrName: string]: any }): Promise<void>;
+  removeAttribute(attrName: string): Promise<string>;
+  removeAttributes(attrNames: string[]): Promise<string>;
+  hasAttribute(attrName: string): Promise<boolean>;
+
+  getClasses(): Promise<string[]>;
+  setClasses(classNames: string[]): Promise<void>;
+
+  addClass(...classNames: string[]): Promise<void>;
+  removeClass(...classNames: string[]): Promise<void>;
+  hasClass(className: string): Promise<boolean>;
+
+  getHtml(): Promise<string>;
+  setHtml(value: string): Promise<void>;
+
+  getText(): Promise<string>;
+  setText(value: string): Promise<void>;
 }
 
 

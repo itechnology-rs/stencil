@@ -1,7 +1,7 @@
 import * as d from '../../declarations';
 import * as pd from './puppeteer-declarations';
 import { initPageEvents } from './puppeteer-events';
-import { initPageUtils } from './puppeteer-utils';
+import { TestElement } from './puppeteer-utils';
 import * as puppeteer from 'puppeteer';
 
 
@@ -17,7 +17,7 @@ export async function newPage() {
 
   await initPageEvents(page);
 
-  initPageUtils(page);
+  page.q = (lightDomSelector) => new TestElement(page, lightDomSelector);
 
   page.waitForQueue = waitForQueue.bind(null, page);
 

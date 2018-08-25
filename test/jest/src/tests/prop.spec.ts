@@ -29,9 +29,8 @@ describe('@Prop', () => {
     await page.waitForQueue();
 
     // select the "prop-cmp" element within the page (same as querySelector)
-    // and once it's received, then return the element's "textContent" property
-    const textContent = await page.$eval('prop-cmp', elm => elm.textContent);
-    expect(textContent).toEqual('Hello, my name is Marty McFly');
+    const shadowRootText = await page.q('prop-cmp').shadow('div').getText();
+    expect(shadowRootText).toEqual('Hello, my name is Marty McFly');
   });
 
   it('should set props from attributes', async () => {
@@ -39,8 +38,7 @@ describe('@Prop', () => {
       <prop-cmp first="Marty" last-name="McFly"></prop-cmp>
     `);
 
-    const textContent = await page.$eval('prop-cmp', elm => elm.textContent);
-    expect(textContent).toEqual('Hello, my name is Marty McFly');
+    expect(await page.q('prop-cmp').shadow('div').getText()).toEqual('Hello, my name is Marty McFly');
   });
 
 });

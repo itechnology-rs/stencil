@@ -12,9 +12,14 @@ describe('@Element', () => {
       <element-cmp host-element-attr="Marty McFly"></element-cmp>
     `);
 
-    // select the "element-cmp" element within the page (same as querySelector)
-    // and once it's received, then return the element's "textContent" property
-    expect(await page.$('element-cmp').text()).toBe('Hello, my name is Marty McFly');
+    // with page.q() select the "element-cmp" element (uses querySelector)
+    // then get the selected element's textContent, which is all async
+    const textContent = await page.q('element-cmp').getText();
+    expect(textContent).toBe('Hello, my name is Marty McFly');
+
+    await page.q('element-cmp').setText('Hello, my name is Doc Brown');
+
+    expect(await page.q('element-cmp').getText()).toBe('Hello, my name is Doc Brown');
   });
 
 });
