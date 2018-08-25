@@ -18,6 +18,8 @@ export interface TestPage extends puppeteer.Page {
 
   gotoTest(url: string, options?: Partial<puppeteer.NavigationOptions>): Promise<puppeteer.Response | null>;
 
+  testshot(opts: TestScreenshotOptions): Promise<void>;
+
   setTestContent(html: string): Promise<void>;
 
   waitForEvent(selector: 'window' | 'document' | string, eventName: string, opts?: WaitForEventOptions): Promise<CustomEvent>;
@@ -39,6 +41,7 @@ export interface QueryTestElement extends TestElementUtils {
 export interface TestElementUtils {
   getProperty<T>(propName: string): Promise<T>;
   setProperty(propName: string, propValue: any): Promise<void>;
+  setProperties(props: {[propName: string]: any }): Promise<void>;
 
   getAttribute(attrName: string): Promise<string>;
   getAttributes(): Promise<{[attrName: string]: any}>;
@@ -88,4 +91,9 @@ export interface BrowserWindow extends Window {
   stencilSerializeEvent(ev: CustomEvent): any;
   stencilSerializeEventTarget(target: any): any;
   stencilAppLoaded: boolean;
+}
+
+
+export interface TestScreenshotOptions extends puppeteer.ScreenshotOptions {
+
 }

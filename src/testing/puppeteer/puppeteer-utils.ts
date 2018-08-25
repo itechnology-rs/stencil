@@ -25,6 +25,14 @@ export class TestElement implements pd.QueryTestElement {
     }, await this.handlePromise, propName, propValue);
   }
 
+  async setProperties(props: {[propName: string]: any }) {
+    return this.page.evaluate((elm: any, props: {[propName: string]: any }) => {
+      Object.keys(props).forEach(propName => {
+        elm[propName] = props[propName];
+      });
+    }, await this.handlePromise, props);
+  }
+
   async getAttribute(attrName: string) {
     return this.page.evaluate((elm: HTMLElement, attrName: string) => {
       return elm.getAttribute(attrName);
@@ -173,6 +181,19 @@ export class ShadowDomElementUtils implements pd.TestElementUtils {
         elm[propName] = propValue;
       }
     }, await this.handlePromise, this.shadowRootSelector, propName, propValue);
+  }
+
+  async setProperties(props: {[attrName: string]: any }) {
+    return this.page.evaluate((hostElm, shadowRootSelector, props: {[attrName: string]: any }) => {
+      const elm = shadowRootSelector ? hostElm.shadowRoot.querySelector(shadowRootSelector) : hostElm.shadowRoot;
+      if (!elm) {
+        return;
+      }
+
+      Object.keys(props).forEach(propName => {
+        elm[propName] = props[propName];
+      });
+    }, await this.handlePromise, this.shadowRootSelector, props);
   }
 
   async getAttribute(attrName: string) {

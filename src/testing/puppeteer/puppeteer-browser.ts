@@ -5,7 +5,7 @@ import * as puppeteer from 'puppeteer';
 let sharedGlobalBrowser: puppeteer.Browser = null;
 
 
-export async function setupTestPuppeteer() {
+export async function setupTestPuppeteer(config: d.Config) {
   // sharedGlobalBrowser is only availabe here,
   // but it not available to jest tests since they'll
   // be in different threads
@@ -18,6 +18,10 @@ export async function setupTestPuppeteer() {
 
   const env: d.JestProcessEnv = process.env;
   env.__STENCIL_TEST_BROWSER_WS_ENDPOINT__ = sharedGlobalBrowser.wsEndpoint();
+
+  if (typeof config.screenshot === 'string') {
+    env.__STENCIL_TEST_SCREENSHOT__ = config.screenshot;
+  }
 }
 
 

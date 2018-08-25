@@ -8,7 +8,7 @@ export async function jestGlobalSetup() {
 
   await Promise.all([
     await setupTestApp(config),
-    await setupTestPuppeteer()
+    await setupTestPuppeteer(config)
   ]);
 }
 

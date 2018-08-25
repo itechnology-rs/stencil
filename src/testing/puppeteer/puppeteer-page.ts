@@ -1,6 +1,7 @@
 import * as d from '../../declarations';
 import * as pd from './puppeteer-declarations';
 import { initPageEvents } from './puppeteer-events';
+import { initScreenshot } from './puppeteer-screenshot';
 import { TestElement } from './puppeteer-utils';
 import * as puppeteer from 'puppeteer';
 
@@ -16,6 +17,8 @@ export async function newTestPage(opts: pd.NewTestPageOptions = {}) {
   const page: pd.TestPage = await global.__NEW_TEST_PAGE__();
 
   await initPageEvents(page);
+
+  initScreenshot(page);
 
   page.q = (lightDomSelector) => new TestElement(page, lightDomSelector);
 

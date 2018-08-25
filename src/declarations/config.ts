@@ -124,6 +124,7 @@ export interface StencilConfig {
   minifyCss?: boolean;
   minifyJs?: boolean;
   preamble?: string;
+  screenshot?: string;
   srcIndexHtml?: string;
   sys?: d.StencilSystem;
   tsconfig?: string;
@@ -201,6 +202,7 @@ export interface ConfigFlags {
   prerender?: boolean;
   prod?: boolean;
   root?: string;
+  screenshot?: boolean;
   serve?: boolean;
   serviceWorker?: boolean;
   ssr?: boolean;

@@ -29,4 +29,5 @@ export interface JestProcessEnv {
   __STENCIL_TEST_BROWSER_URL__?: string;
   __STENCIL_TEST_LOADER_SCRIPT_URL__?: string;
   __STENCIL_TEST_BROWSER_WS_ENDPOINT__?: string;
+  __STENCIL_TEST_SCREENSHOT__?: string;
 }
