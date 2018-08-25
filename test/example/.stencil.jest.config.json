@@ -11,8 +11,11 @@
     "/Users/adam/git/stencil/test/example/node_modules",
     "/Users/adam/git/stencil/test/example/www"
   ],
-  "setupTestFrameworkScriptFile": "/Users/adam/git/stencil/testing/jest.setupframework.js",
+  "setupTestFrameworkScriptFile": "/Users/adam/git/stencil/testing/jest.setuptest.js",
   "testEnvironment": "/Users/adam/git/stencil/testing/jest.environment.js",
+  "testMatch": [
+    "**/+(*.)+(e2e|spec).+(ts|tsx|js)?(x)"
+  ],
   "transform": {
     "^.+\\.(ts|tsx)$": "/Users/adam/git/stencil/testing/jest.preprocessor.js"
   }

@@ -16,6 +16,8 @@ export async function startPuppeteerBrowser(config: d.Config) {
   const env: d.JestProcessEnv = process.env;
   env.__STENCIL_TEST_BROWSER_WS_ENDPOINT__ = browser.wsEndpoint();
 
+  config.logger.debug(`puppeteer browser wsEndpoint: ${env.__STENCIL_TEST_BROWSER_WS_ENDPOINT__}`);
+
   return browser;
 }
 

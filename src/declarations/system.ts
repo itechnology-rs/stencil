@@ -151,6 +151,7 @@ export interface PackageJsonData {
   name?: string;
   version?: string;
   main?: string;
+  bin?: {[key: string]: string};
   browser?: string;
   module?: string;
   'jsnext:main'?: string;

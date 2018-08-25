@@ -1,8 +1,8 @@
 import * as d from '../declarations';
 import { getLoaderFileName } from '../compiler/app/app-file-naming';
 import { hasError, normalizePath } from '../compiler/util';
+import { runJest } from './jest/jest-runner';
 import { startPuppeteerBrowser } from './puppeteer/puppeteer-browser';
-import * as cp from 'child_process';
 import * as path from 'path';
 import * as puppeteer from 'puppeteer';
 
@@ -74,24 +74,13 @@ export class Testing implements d.Testing {
     if (this.devServer) {
       const env: d.JestProcessEnv = process.env;
       env.__STENCIL_TEST_BROWSER_URL__ = this.devServer.browserUrl;
+      config.logger.debug(`dev server browserUrl: ${env.__STENCIL_TEST_BROWSER_URL__}`);
+
       env.__STENCIL_TEST_LOADER_SCRIPT_URL__ = getLoaderScriptUrl(config, outputTarget, this.devServer.browserUrl);
+      config.logger.debug(`dev server loader script: ${env.__STENCIL_TEST_LOADER_SCRIPT_URL__}`);
     }
 
-    await this.runJest(config, this.jestConfigPath);
-  }
-
-  async runJest(config: d.Config, jestConfigPath: string) {
-    const jestPkgJson = config.sys.resolveModule(config.rootDir, 'jest');
-    const jestModuleRoot = path.dirname(jestPkgJson);
-    const jestBinModule = path.join(jestModuleRoot, 'bin', 'jest.js');
-
-    const args = process.argv.slice(2);
-
-    args.push('--config', jestConfigPath);
-
-    cp.fork(jestBinModule, args, {
-      cwd: config.rootDir
-    });
+    await runJest(config, this.jestConfigPath);
   }
 
   async destroy() {
@@ -124,6 +113,8 @@ export class Testing implements d.Testing {
 
 async function setupJestConfig(config: d.Config) {
   const jestConfigPath = path.join(config.rootDir, STENCIL_JEST_CONFIG);
+
+  config.logger.debug(`jest config: ${jestConfigPath}`);
 
   await config.sys.fs.writeFile(
     jestConfigPath,
