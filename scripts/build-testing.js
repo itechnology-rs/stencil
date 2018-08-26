@@ -79,11 +79,12 @@ if (success) {
     });
   }
 
-  const screenshotLocalAdapterSrc = path.join(TRANSPILED_DIR, 'testing', 'screenshot', 'screenshot.local.adapter.js');
-  const screenshotLocalAdapterDst = path.join(__dirname, '..', 'testing', 'screenshot.local.adapter.js');
-  fs.copyFileSync(screenshotLocalAdapterSrc, screenshotLocalAdapterDst);
+  function buildScreenshotTools() {
+    transpile(path.join('..', 'src', 'testing', 'screenshot', 'tsconfig.json'))
+  }
 
   bundleTestingUtils();
+  buildScreenshotTools();
 
 
   process.on('exit', () => {
