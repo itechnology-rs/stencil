@@ -4,11 +4,8 @@ import * as puppeteer from 'puppeteer';
 import * as crypto from 'crypto';
 
 
-declare const global: d.JestEnvironmentGlobal;
-
-
-export function initScreenshot(page: pd.TestPage) {
-  const screenshotAdapterPath = (process.env as d.JestProcessEnv).__STENCIL_TEST_SCREENSHOT__;
+export function initTestPageScreenshot(page: pd.TestPage) {
+  const screenshotAdapterPath = (process.env as d.JestProcessEnv).__STENCIL_SCREENSHOT_ADAPTER__;
   if (!screenshotAdapterPath) {
     // screen shot not enabled, so don't bother creating all this
     page.e2eScreenshot = () => Promise.resolve();
@@ -19,65 +16,98 @@ export function initScreenshot(page: pd.TestPage) {
 }
 
 
-export async function screenshot(page: pd.TestPage, screenshotAdapterPath: string, opts: d.TestScreenshotOptions) {
+export async function setupScreenshots(config: d.Config, snapshotId: string) {
+  const data: d.ScreenshotSetupData = {
+    rootDir: config.rootDir,
+    snapshotId: snapshotId,
+    screenshotAdapter: config.testing.screenshotAdapter
+  };
+
+  if (data.screenshotAdapter) {
+    const plugin: d.ScreenshotAdapterPlugin = require(data.screenshotAdapter);
+
+    const adapter = plugin();
+
+    if (adapter && typeof adapter.setup === 'function') {
+      await adapter.setup(data);
+    }
+  }
+
+  return data;
+}
+
+
+export async function teardownScreenshots(data: d.ScreenshotSetupData) {
+  if (data.screenshotAdapter) {
+    const plugin: d.ScreenshotAdapterPlugin = require(data.screenshotAdapter);
+
+    const adapter = plugin();
+
+    if (adapter && typeof adapter.teardown === 'function') {
+      await adapter.teardown(data);
+    }
+  }
+}
+
+
+export async function screenshot(page: pd.TestPage, screenshotAdapterPath: string, uniqueDescription: string, opts: d.TestScreenshotOptions = {}) {
   const plugin: d.ScreenshotAdapterPlugin = require(screenshotAdapterPath);
 
   const adapter = plugin();
 
-  const testSpecData: d.TestSpecData = {
-    testId: opts.testId ? opts.testId : createTestId(global.specData),
-    testDesc: opts.testDesc ? opts.testDesc : global.specData.fullName,
-    testPath: global.specData.testPath
+  const buf = await page.screenshot(createPuppeteerScreenshopOptions(opts));
+
+  const hash = crypto.createHash('md5')
+                     .update(buf)
+                     .digest('base64')
+                     .replace(/\W/g, '');
+
+  const env = (process.env) as d.JestProcessEnv;
+
+  const commitData: d.CommitScreenshotData = {
+    testId: createTestId(uniqueDescription),
+    snapshotId: env.__STENCIL_SNAPSHOT_ID__,
+    rootDir: env.__STENCIL_ROOT_DIR__,
+    description: uniqueDescription,
+    screenshot: buf,
+    hash: hash,
+    type: 'png'
   };
 
-  if (typeof adapter.beforeScreenshot === 'function') {
-    const rtn: any = adapter.beforeScreenshot(Object.assign({}, testSpecData));
-    if (rtn) {
-      let results: d.BeforeScreenshotResults;
-
-      if (typeof rtn.then === 'function') {
-        results = await rtn;
-      } else {
-        results = rtn;
-      }
-
-      if (results) {
-        if (results.skipScreenshot) {
-          return;
-        }
-        if (typeof results.testId === 'string') {
-          testSpecData.testId = results.testId;
-        }
-        if (typeof results.testDesc === 'string') {
-          testSpecData.testDesc = results.testDesc;
-        }
-      }
+  if (typeof adapter.commitScreenshot === 'function') {
+    const rtn = adapter.commitScreenshot(commitData);
+    if (rtn && typeof rtn.then === 'function') {
+      await rtn;
     }
   }
+}
 
-  const screenshotOpts: puppeteer.ScreenshotOptions = {
+
+function createPuppeteerScreenshopOptions(opts: d.TestScreenshotOptions) {
+  const puppeteerOpts: puppeteer.ScreenshotOptions = {
+    type: 'png',
     fullPage: opts.fullPage,
-    omitBackground: opts.omitBackground,
+    omitBackground: opts.omitBackground
   };
+
   if (opts.clip) {
-    screenshotOpts.clip = {
+    puppeteerOpts.clip = {
       x: opts.clip.x,
       y: opts.clip.y,
       width: opts.clip.width,
       height: opts.clip.height
     };
   }
+  (puppeteerOpts as any).encoding = 'binary';
 
-  await page.screenshot(screenshotOpts);
+  return puppeteerOpts;
 }
 
-function createTestId(specData: d.JestSpecData) {
-  const testId = `${specData.fullName}-${specData.id}`;
 
+function createTestId(uniqueDescription: string) {
   return crypto.createHash('md5')
-               .update(testId)
+               .update(uniqueDescription)
                .digest('base64')
                .replace(/\W/g, '')
-               .substr(0, 14)
-               .toLowerCase();
+               .substr(0, 12);
 }

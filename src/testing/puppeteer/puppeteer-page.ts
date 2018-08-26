@@ -2,7 +2,7 @@ import * as d from '../../declarations';
 import * as pd from './puppeteer-declarations';
 import { FindTestElement } from './puppeteer-utils';
 import { initPageEvents } from './puppeteer-events';
-import { initScreenshot } from './puppeteer-screenshot';
+import { initTestPageScreenshot } from './puppeteer-screenshot';
 import * as puppeteer from 'puppeteer';
 
 
@@ -18,7 +18,7 @@ export async function newTestPage(opts: pd.NewTestPageOptions = {}) {
 
   await initPageEvents(page);
 
-  initScreenshot(page);
+  initTestPageScreenshot(page);
 
   page.find = (lightDomSelector) => new FindTestElement(page, lightDomSelector);
 
@@ -51,7 +51,7 @@ async function gotoTest(page: pd.TestPage, url: string) {
     throw new Error('gotoTest() url must start with /');
   }
 
-  const browserUrl = (process.env as d.JestProcessEnv).__STENCIL_TEST_BROWSER_URL__;
+  const browserUrl = (process.env as d.JestProcessEnv).__STENCIL_BROWSER_URL__;
   if (typeof browserUrl !== 'string') {
     throw new Error('invalid gotoTest() browser url');
   }
@@ -74,7 +74,7 @@ async function setTestContent(page: pd.TestPage, html: string) {
     throw new Error('invalid setTestContent() html');
   }
 
-  const loaderUrl = (process.env as d.JestProcessEnv).__STENCIL_TEST_LOADER_SCRIPT_URL__;
+  const loaderUrl = (process.env as d.JestProcessEnv).__STENCIL_LOADER_SCRIPT_URL__;
   if (typeof loaderUrl !== 'string') {
     throw new Error('invalid setTestContent() loader script url');
   }

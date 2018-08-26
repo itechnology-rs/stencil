@@ -20,24 +20,16 @@ export interface JestEnvironmentGlobal {
   loadTestWindow: (testWindow: any) => Promise<void>;
   h: any;
   resourcesUrl: string;
-  it(name: string, fn: any, timeout?: number): JestSpecData;
-  specData: JestSpecData;
-}
-
-
-export interface JestSpecData {
-  id: string;
-  description: string;
-  fullName: string;
-  testPath: string;
 }
 
 
 export interface JestProcessEnv {
-  __STENCIL_TEST_BROWSER_URL__?: string;
-  __STENCIL_TEST_LOADER_SCRIPT_URL__?: string;
-  __STENCIL_TEST_BROWSER_WS_ENDPOINT__?: string;
-  __STENCIL_TEST_SCREENSHOT__?: string;
+  __STENCIL_ROOT_DIR__?: string;
+  __STENCIL_BROWSER_URL__?: string;
+  __STENCIL_LOADER_SCRIPT_URL__?: string;
+  __STENCIL_BROWSER_WS_ENDPOINT__?: string;
+  __STENCIL_SCREENSHOT_ADAPTER__?: string;
+  __STENCIL_SNAPSHOT_ID__?: string;
 }
 
 
@@ -65,35 +57,36 @@ export type ScreenshotAdapterPlugin = () => ScreenshotAdapter;
 
 
 export interface ScreenshotAdapter {
-
-  setup?(): Promise<void>;
-
-  beforeScreenshot?(specData: TestSpecData): Promise<BeforeScreenshotResults> | BeforeScreenshotResults;
-
-  commitScreenshot?(opts: TestScreenshotOptions): Promise<void>;
-
-  teardown?(): Promise<void>;
-
+  setup?(screenshotData: ScreenshotSetupData): Promise<void>;
+  commitScreenshot?(commitData: CommitScreenshotData): Promise<void>;
+  teardown?(screenshotData: ScreenshotSetupData): Promise<void>;
 }
 
-export interface TestSpecData {
+
+export interface ScreenshotSetupData {
+  rootDir: string;
+  snapshotId: string;
+  screenshotAdapter: string;
+}
+
+
+export interface CommitScreenshotData {
   testId: string;
-  testPath: string;
-  testDesc: string;
+  rootDir: string;
+  snapshotId: string;
+  description: string;
+  hash: string;
+  screenshot: Buffer;
+  type: string;
 }
+
 
 export interface BeforeScreenshotResults {
-  testId: string;
-  testDesc: string;
   skipScreenshot?: boolean;
 }
 
 
 export interface TestScreenshotOptions {
-  testId: string;
-  testPath: string;
-  testDesc: string;
-
   /**
    * When true, takes a screenshot of the full scrollable page.
    * @default false

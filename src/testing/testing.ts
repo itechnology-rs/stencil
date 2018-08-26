@@ -2,7 +2,9 @@ import * as d from '../declarations';
 import { getLoaderFileName } from '../compiler/app/app-file-naming';
 import { hasError, normalizePath } from '../compiler/util';
 import { runJest, setupJestConfig } from './jest/jest-runner';
+import { setupScreenshots, teardownScreenshots } from './puppeteer/puppeteer-screenshot';
 import { startPuppeteerBrowser } from './puppeteer/puppeteer-browser';
+import * as crypto from 'crypto';
 import * as path from 'path';
 import * as puppeteer from 'puppeteer';
 
@@ -44,6 +46,9 @@ export class Testing implements d.Testing {
       return;
     }
 
+    const snapshotId = createSnapshotId();
+    config.logger.debug(`test snapshot id: ${snapshotId}`);
+
     const msg: string[] = [];
     if (config.flags.e2e) {
       msg.push('e2e');
@@ -57,7 +62,7 @@ export class Testing implements d.Testing {
       compiler.build(),
       compiler.startDevServer(),
       startPuppeteerBrowser(config),
-      setupJestConfig(config),
+      setupJestConfig(config, snapshotId),
     ]);
 
     const results = startupResults[0];
@@ -72,14 +77,18 @@ export class Testing implements d.Testing {
 
     if (this.devServer) {
       const env: d.JestProcessEnv = process.env;
-      env.__STENCIL_TEST_BROWSER_URL__ = this.devServer.browserUrl;
-      config.logger.debug(`dev server url: ${env.__STENCIL_TEST_BROWSER_URL__}`);
+      env.__STENCIL_BROWSER_URL__ = this.devServer.browserUrl;
+      config.logger.debug(`dev server url: ${env.__STENCIL_BROWSER_URL__}`);
 
-      env.__STENCIL_TEST_LOADER_SCRIPT_URL__ = getLoaderScriptUrl(config, outputTarget, this.devServer.browserUrl);
-      config.logger.debug(`dev server loader: ${env.__STENCIL_TEST_LOADER_SCRIPT_URL__}`);
+      env.__STENCIL_LOADER_SCRIPT_URL__ = getLoaderScriptUrl(config, outputTarget, this.devServer.browserUrl);
+      config.logger.debug(`dev server loader: ${env.__STENCIL_LOADER_SCRIPT_URL__}`);
     }
 
+    const screenshotData = await setupScreenshots(config, snapshotId);
+
     await runJest(config, this.jestConfigPath);
+
+    await teardownScreenshots(screenshotData);
 
     config.logger.info('');
   }
@@ -124,6 +133,7 @@ function setupTestingConfig(config: d.Config) {
   return config;
 }
 
+
 function getOutputTarget(config: d.Config) {
   let isValid = true;
 
@@ -158,4 +168,13 @@ function getLoaderScriptUrl(config: d.Config, outputTarget: d.OutputTargetWww, b
   }
 
   return `${browserUrl}/${buildDir}/${getLoaderFileName(config)}`;
+}
+
+
+function createSnapshotId() {
+  return crypto.createHash('md5')
+               .update(Date.now().toString())
+               .digest('base64')
+               .replace(/\W/g, '')
+               .substr(0, 8);
 }

@@ -17,7 +17,6 @@ export class EventCmp {
 
   @Method()
   methodThatFiresMyWindowEvent(value: number) {
-    console.log('methodThatFiresMyWindowEvent()', value);
     this.myWindowEvent.emit(value);
   }
 
@@ -28,7 +27,6 @@ export class EventCmp {
 
   @Method()
   methodThatFiresEventWithOptions() {
-    console.log('methodThatFiresEventWithOptions()');
     this.myEventWithOptions.emit({ mph: 88 });
   }
 

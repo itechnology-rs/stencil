@@ -1,19 +1,24 @@
 import * as d from '../../declarations';
 
 
-export default function screenshotLocalAdapter(): d.ScreenshotAdapter {
+function screenshotLocalAdapter(): d.ScreenshotAdapter {
 
   return {
 
-    async beforeScreenshot(specData) {
-      console.log('\n\n\n beforeScreenshot', specData, '\n\n\n\n\n')
-      return null;
+    async setup(data) {
+      console.log('\n\n\n setup', data,'\n\n\n\n\n')
     },
 
-    async commitScreenshot(opts) {
-      opts;
-    }
+    async commitScreenshot(screenshotData) {
+      console.log('\n\n\n commitScreenshot', screenshotData,' \n\n\n\n\n')
+    },
+
+    async teardown(data) {
+      console.log('\n\n\n teardown, ',data,' \n\n\n\n\n')
+    },
 
   };
 
 }
+
+module.exports = screenshotLocalAdapter;

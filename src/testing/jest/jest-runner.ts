@@ -27,14 +27,25 @@ export async function runJest(config: d.Config, jestConfigPath: string) {
 }
 
 
-export async function setupJestConfig(config: d.Config) {
+export async function setupJestConfig(config: d.Config, snapshotId: string) {
+  const env = (process.env as d.JestProcessEnv);
   const jestConfigPath = path.join(config.rootDir, STENCIL_JEST_CONFIG);
 
   config.logger.debug(`jest config: ${jestConfigPath}`);
 
+  env.__STENCIL_SNAPSHOT_ID__ = snapshotId;
+  env.__STENCIL_ROOT_DIR__ = config.rootDir;
+
+  if (config.flags.e2e && config.testing.screenshotAdapter) {
+    env.__STENCIL_SCREENSHOT_ADAPTER__ = config.testing.screenshotAdapter;
+  }
+
+  const jestConfig = Object.assign({}, config.testing);
+  delete jestConfig.screenshotAdapter;
+
   await config.sys.fs.writeFile(
     jestConfigPath,
-    JSON.stringify(config.testing, null, 2)
+    JSON.stringify(jestConfig, null, 2)
   );
 
   return jestConfigPath;

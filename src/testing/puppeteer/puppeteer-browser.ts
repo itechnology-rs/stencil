@@ -14,9 +14,9 @@ export async function startPuppeteerBrowser(config: d.Config) {
   });
 
   const env: d.JestProcessEnv = process.env;
-  env.__STENCIL_TEST_BROWSER_WS_ENDPOINT__ = browser.wsEndpoint();
+  env.__STENCIL_BROWSER_WS_ENDPOINT__ = browser.wsEndpoint();
 
-  config.logger.debug(`puppeteer browser wsEndpoint: ${env.__STENCIL_TEST_BROWSER_WS_ENDPOINT__}`);
+  config.logger.debug(`puppeteer browser wsEndpoint: ${env.__STENCIL_BROWSER_WS_ENDPOINT__}`);
 
   return browser;
 }
@@ -29,13 +29,13 @@ export async function connectBrowser() {
   // uses process.env for data
   const env: d.JestProcessEnv = process.env;
 
-  const wsEndpoint = env.__STENCIL_TEST_BROWSER_WS_ENDPOINT__;
+  const wsEndpoint = env.__STENCIL_BROWSER_WS_ENDPOINT__;
   if (!wsEndpoint) {
     return null;
   }
 
   const connectOpts: puppeteer.ConnectOptions = {
-    browserWSEndpoint: env.__STENCIL_TEST_BROWSER_WS_ENDPOINT__,
+    browserWSEndpoint: env.__STENCIL_BROWSER_WS_ENDPOINT__,
     ignoreHTTPSErrors: true
   };
 

@@ -19,7 +19,7 @@ export interface TestPage extends puppeteer.Page {
 
   gotoTest(url: string, options?: Partial<puppeteer.NavigationOptions>): Promise<puppeteer.Response | null>;
 
-  e2eScreenshot(opts?: d.TestScreenshotOptions): Promise<void>;
+  e2eScreenshot(uniqueDescription: string, opts?: d.TestScreenshotOptions): Promise<void>;
 
   setTestContent(html: string): Promise<void>;
 

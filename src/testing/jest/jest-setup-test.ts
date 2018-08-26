@@ -12,10 +12,4 @@ export function jestSetupTestFramework() {
   global.h = h;
   global.resourcesUrl = '/build';
   expect.extend(customExpect);
-
-  const originalIt = global.it;
-  global.it = function () {
-    global.specData = originalIt.apply(undefined, arguments);
-    return global.specData;
-  };
 }
