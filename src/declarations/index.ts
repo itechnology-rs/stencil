@@ -28,7 +28,6 @@ export * from './output-targets';
 export * from './platform';
 export * from './plugin';
 export * from './render';
-export * from './screenshot';
 export * from './server';
 export * from './style';
 export * from './system';

@@ -14,6 +14,13 @@ export function validateTesting(config: d.Config) {
     testing.moduleFileExtensions = DEFAULT_MODULE_FILE_EXTENSIONS;
   }
 
+  if (!Array.isArray(testing.reporters)) {
+    testing.reporters = [
+      'default',
+      config.sys.path.join(config.sys.compiler.packageDir, 'testing', 'jest.reporter.js')
+    ];
+  }
+
   if (!Array.isArray(testing.testPathIgnorePatterns)) {
     testing.testPathIgnorePatterns = DEFAULT_IGNORE_PATTERNS.map(ignorePattern => {
       return config.sys.path.join(config.rootDir, ignorePattern);

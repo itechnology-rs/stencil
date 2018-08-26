@@ -1,6 +1,8 @@
 
-export { JestEnvironment, jestSetupTestFramework } from './jest/jest-environment';
+export { JestEnvironment } from './jest/jest-environment';
 export { jestPreprocessor } from './jest/jest-preprocessor';
+export { jestSetupTestFramework } from './jest/jest-setup-test';
+export { JestReporter } from './jest/jest-reporter';
 export { mockDocument, mockWindow } from './mocks';
 export { newTestPage } from './puppeteer/puppeteer-page';
 export { Testing } from './testing';

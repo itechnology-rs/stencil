@@ -1,3 +1,4 @@
+import * as d from '../../declarations';
 import * as puppeteer from 'puppeteer';
 
 
@@ -18,7 +19,7 @@ export interface TestPage extends puppeteer.Page {
 
   gotoTest(url: string, options?: Partial<puppeteer.NavigationOptions>): Promise<puppeteer.Response | null>;
 
-  testshot(opts: TestScreenshotOptions): Promise<void>;
+  e2eScreenshot(opts?: d.TestScreenshotOptions): Promise<void>;
 
   setTestContent(html: string): Promise<void>;
 
@@ -91,9 +92,4 @@ export interface BrowserWindow extends Window {
   stencilSerializeEvent(ev: CustomEvent): any;
   stencilSerializeEventTarget(target: any): any;
   stencilAppLoaded: boolean;
-}
-
-
-export interface TestScreenshotOptions extends puppeteer.ScreenshotOptions {
-
 }

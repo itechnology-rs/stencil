@@ -20,7 +20,16 @@ export interface JestEnvironmentGlobal {
   loadTestWindow: (testWindow: any) => Promise<void>;
   h: any;
   resourcesUrl: string;
-  spyOnEvent: (el: Node, eventName: string) => jest.Mock<{}>;
+  it(name: string, fn: any, timeout?: number): JestSpecData;
+  specData: JestSpecData;
+}
+
+
+export interface JestSpecData {
+  id: string;
+  description: string;
+  fullName: string;
+  testPath: string;
 }
 
 
@@ -41,6 +50,7 @@ export interface Testing {
 
 export interface TestingConfig {
   moduleFileExtensions?: string[];
+  reporters?: string[];
   setupTestFrameworkScriptFile?: string;
   screenshotAdapter?: string;
   testEnvironment?: string;
@@ -48,4 +58,65 @@ export interface TestingConfig {
   testPathIgnorePatterns?: string[];
   testRegex?: string;
   transform?: {[key: string]: string };
+}
+
+
+export type ScreenshotAdapterPlugin = () => ScreenshotAdapter;
+
+
+export interface ScreenshotAdapter {
+
+  setup?(): Promise<void>;
+
+  beforeScreenshot?(specData: TestSpecData): Promise<BeforeScreenshotResults> | BeforeScreenshotResults;
+
+  commitScreenshot?(opts: TestScreenshotOptions): Promise<void>;
+
+  teardown?(): Promise<void>;
+
+}
+
+export interface TestSpecData {
+  testId: string;
+  testPath: string;
+  testDesc: string;
+}
+
+export interface BeforeScreenshotResults {
+  testId: string;
+  testDesc: string;
+  skipScreenshot?: boolean;
+}
+
+
+export interface TestScreenshotOptions {
+  testId: string;
+  testPath: string;
+  testDesc: string;
+
+  /**
+   * When true, takes a screenshot of the full scrollable page.
+   * @default false
+   */
+  fullPage?: boolean;
+
+  /**
+   * Hides default white background and allows capturing screenshots with transparency.
+   * @default false
+   */
+  omitBackground?: boolean;
+
+  /**
+   * An object which specifies clipping region of the page.
+   */
+  clip?: {
+    /** The x-coordinate of top-left corner. */
+    x: number;
+    /** The y-coordinate of top-left corner. */
+    y: number;
+    /** The width. */
+    width: number;
+    /** The height. */
+    height: number;
+  };
 }

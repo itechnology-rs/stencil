@@ -72,12 +72,6 @@ export function wroteFile(r: BuildResults, p: string) {
   });
 }
 
-export function spyOnEvent(el: Node, eventName: string) {
-  const fn = jest.fn();
-  el.addEventListener(eventName, (ev: any) => fn(ev.detail));
-  return fn;
-}
-
 export function shuffleArray(array: any[]) {
   // http://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
   let currentIndex = array.length;
