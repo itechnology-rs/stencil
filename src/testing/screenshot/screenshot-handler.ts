@@ -13,35 +13,29 @@ export async function startE2ESnapshot(config: d.Config) {
 
   const tmpDir = config.sys.details.tmpDir;
 
-  const rootDir = config.sys.path.join(tmpDir, 'stencil-e2e-screenshots');
-  try {
-    await config.sys.fs.mkdir(rootDir);
-  } catch (e) {}
-
-  const imagesDir = config.sys.path.join(rootDir, 'images');
+  const imagesDir = config.sys.path.join(tmpDir, 'stencil-e2e-screenshots');
   try {
     await config.sys.fs.mkdir(imagesDir);
   } catch (e) {}
 
   env.__STENCIL_SCREENSHOT_IMAGES_DIR__ = imagesDir;
 
-  const dataDir = config.sys.path.join(rootDir, 'data');
+  const dataDir = config.sys.path.join(tmpDir, 'stencil-e2e-data');
   try {
     await config.sys.fs.mkdir(dataDir);
   } catch (e) {}
 
   const snapshotDataDir = config.sys.path.join(dataDir, snapshotId);
   try {
-    await config.sys.fs.mkdir(dataDir);
+    await config.sys.fs.mkdir(snapshotDataDir);
   } catch (e) {}
 
   env.__STENCIL_SCREENSHOT_DATA_DIR__ = snapshotDataDir;
 
   const snapshot: d.E2ESnapshot = {
-    snapshotId: snapshotId,
-    rootDir: rootDir,
+    id: snapshotId,
     imagesDir: imagesDir,
-    dataDir: dataDir,
+    dataDir: snapshotDataDir,
     timestamp: Date.now()
   };
 
@@ -56,7 +50,9 @@ export async function writeE2EScreenshot(screenshot: Buffer, uniqueDescription: 
                      .update(screenshot)
                      .digest('base64');
 
-  const cleanedHash = hash.replace(/\\/g, '~').replace(/\+/g, '_');
+  const cleanedHash = hash.replace(/\\/g, '~')
+                          .replace(/\+/g, '_')
+                          .replace(/\=/g, '');
 
   const imageName = `${cleanedHash}.png`;
   const imagePath = path.join(env.__STENCIL_SCREENSHOT_IMAGES_DIR__, imageName);
@@ -74,31 +70,70 @@ export async function writeE2EScreenshot(screenshot: Buffer, uniqueDescription: 
     id: id,
     desc: uniqueDescription,
     hash: hash,
-    image: imagePath
+    image: imageName
   };
 
   await writeFile(dataPath, JSON.stringify(screenshotData));
 }
 
 
-export async function completeE2EScreenshots(config: d.Config, snapshot: d.E2ESnapshot) {
+export async function completeE2EScreenshots(config: d.Config, results: d.E2ESnapshot) {
   const screenshotAdapters = config.testing.screenshotAdapters;
   if (!Array.isArray(screenshotAdapters)) {
     return;
   }
 
+  const snapshot = await consolidateData(config, results);
+
   for (let i = 0; i < screenshotAdapters.length; i++) {
     const screenshotAdapter = screenshotAdapters[i];
 
     if (typeof screenshotAdapter === 'string') {
-      await runScreenshotAdapter(screenshotAdapter, snapshot);
+      await runScreenshotAdapter(screenshotAdapter, JSON.parse(JSON.stringify(snapshot)));
     }
   }
 }
 
 
+async function consolidateData(config: d.Config, results: d.E2ESnapshot) {
+  const dataJsonDir = results.dataDir;
+
+  const snapshot: d.E2ESnapshot = {
+    id: results.id,
+    imagesDir: results.imagesDir,
+    timestamp: results.timestamp,
+    screenshots: []
+  };
+
+  const screenshotJsonFiles = await config.sys.fs.readdir(dataJsonDir);
+
+  const unlinks: Promise<void>[] = [];
+
+  screenshotJsonFiles.forEach(screenshotJsonFileName => {
+    const screenshotJsonFilePath = config.sys.path.join(dataJsonDir, screenshotJsonFileName);
+
+    const screenshotData: d.E2EScreenshot = JSON.parse(config.sys.fs.readFileSync(screenshotJsonFilePath));
+
+    snapshot.screenshots.push(screenshotData);
+
+    unlinks.push(config.sys.fs.unlink(screenshotJsonFilePath));
+  });
+
+  await Promise.all(unlinks);
+
+  await config.sys.fs.rmdir(dataJsonDir);
+
+  snapshot.screenshots.sort((a, b) => {
+    if (a.desc < b.desc) return -1;
+    if (a.desc > b.desc) return 1;
+    return 0;
+  });
+
+  return snapshot;
+}
+
+
 async function runScreenshotAdapter(screenshotAdapter: string, snapshot: d.E2ESnapshot) {
-  console.log('screenshotAdapter', screenshotAdapter);
   const ScreenAdapter = require(screenshotAdapter);
 
   const adapter: d.ScreenshotAdaptor = new ScreenAdapter();

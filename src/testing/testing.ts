@@ -46,7 +46,7 @@ export class Testing implements d.Testing {
       return;
     }
 
-    const doScreenshots = (config.flags.e2e && config.flags.screenshot);
+    const doScreenshots = !!(config.flags.e2e && config.flags.screenshot && config.testing.screenshotAdapters);
     if (doScreenshots) {
       env.__STENCIL_E2E_SCREENSHOTS__ = 'true';
     }

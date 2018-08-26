@@ -1,10 +1,9 @@
 
 
 export interface E2ESnapshot {
-  snapshotId: string;
-  rootDir: string;
+  id: string;
   imagesDir: string;
-  dataDir: string;
+  dataDir?: string;
   timestamp: number;
   screenshots?: E2EScreenshot[];
 }
