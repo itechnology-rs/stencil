@@ -80,7 +80,15 @@ if (success) {
   }
 
   function buildScreenshotTools() {
-    transpile(path.join('..', 'src', 'testing', 'screenshot', 'tsconfig.json'))
+    const success = transpile(path.join(__dirname, '..', 'src', 'testing', 'screenshot', 'tsconfig.json'))
+    if (success) {
+      const src = path.join(__dirname, '..', 'testing', 'transpiled-screenshot', 'testing', 'screenshot');
+      const dst = path.join(__dirname, '..', 'testing');
+      fs.copySync(src, dst);
+
+      const rmv = path.join(__dirname, '..', 'testing', 'transpiled-screenshot');
+      fs.removeSync(rmv);
+    }
   }
 
   bundleTestingUtils();
