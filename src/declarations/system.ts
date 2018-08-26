@@ -78,6 +78,7 @@ export interface SystemDetails {
   runtime: string;
   runtimeVersion: string;
   release: string;
+  tmpDir: string;
 }
 
 

@@ -24,12 +24,13 @@ export interface JestEnvironmentGlobal {
 
 
 export interface JestProcessEnv {
-  __STENCIL_ROOT_DIR__?: string;
   __STENCIL_BROWSER_URL__?: string;
   __STENCIL_LOADER_SCRIPT_URL__?: string;
   __STENCIL_BROWSER_WS_ENDPOINT__?: string;
-  __STENCIL_SCREENSHOT_ADAPTER__?: string;
-  __STENCIL_SNAPSHOT_ID__?: string;
+  __STENCIL_E2E_SNAPSHOT_ID__?: string;
+  __STENCIL_E2E_SCREENSHOTS__?: 'true';
+  __STENCIL_SCREENSHOT_IMAGES_DIR__?: string;
+  __STENCIL_SCREENSHOT_DATA_DIR__?: string;
 }
 
 
@@ -44,42 +45,12 @@ export interface TestingConfig {
   moduleFileExtensions?: string[];
   reporters?: string[];
   setupTestFrameworkScriptFile?: string;
-  screenshotAdapter?: string;
+  screenshotAdapters?: string[];
   testEnvironment?: string;
   testMatch?: string[];
   testPathIgnorePatterns?: string[];
   testRegex?: string;
   transform?: {[key: string]: string };
-}
-
-
-export interface ScreenshotAdapter {
-  setup?(screenshotData: ScreenshotSetupData): Promise<void>;
-  commitScreenshot?(commitData: CommitScreenshotData): Promise<void>;
-  teardown?(screenshotData: ScreenshotSetupData): Promise<void>;
-}
-
-
-export interface ScreenshotSetupData {
-  rootDir: string;
-  snapshotId: string;
-  screenshotAdapter: string;
-}
-
-
-export interface CommitScreenshotData {
-  testId: string;
-  rootDir: string;
-  snapshotId: string;
-  description: string;
-  hash: string;
-  screenshot: Buffer;
-  type: string;
-}
-
-
-export interface BeforeScreenshotResults {
-  skipScreenshot?: boolean;
 }
 
 

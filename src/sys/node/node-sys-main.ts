@@ -207,7 +207,8 @@ export class NodeSystem implements d.StencilSystem {
       platform: '',
       release: '',
       runtime: 'node',
-      runtimeVersion: ''
+      runtimeVersion: '',
+      tmpDir: os.tmpdir()
     };
     try {
       const cpus = os.cpus();

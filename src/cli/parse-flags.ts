@@ -135,6 +135,7 @@ const ARG_OPTS = {
     'prerender',
     'service-worker',
     'prod',
+    'screenshot',
     'serve',
     'skip-node-check',
     'spec',

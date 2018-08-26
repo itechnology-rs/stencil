@@ -1,10 +1,9 @@
 import * as d from '../declarations';
+import { completeE2EScreenshots, startE2ESnapshot } from './screenshot/screenshot-handler';
 import { getLoaderFileName } from '../compiler/app/app-file-naming';
 import { hasError, normalizePath } from '../compiler/util';
 import { runJest, setupJestConfig } from './jest/jest-runner';
-import { setupScreenshots, teardownScreenshots } from './puppeteer/puppeteer-screenshot';
 import { startPuppeteerBrowser } from './puppeteer/puppeteer-browser';
-import * as crypto from 'crypto';
 import * as path from 'path';
 import * as puppeteer from 'puppeteer';
 
@@ -38,6 +37,7 @@ export class Testing implements d.Testing {
       return;
     }
 
+    const env: d.JestProcessEnv = process.env;
     const compiler = this.compiler;
     const config = this.config;
     const { isValid, outputTarget } = getOutputTarget(config);
@@ -46,8 +46,10 @@ export class Testing implements d.Testing {
       return;
     }
 
-    const snapshotId = createSnapshotId();
-    config.logger.debug(`test snapshot id: ${snapshotId}`);
+    const doScreenshots = (config.flags.e2e && config.flags.screenshot);
+    if (doScreenshots) {
+      env.__STENCIL_E2E_SCREENSHOTS__ = 'true';
+    }
 
     const msg: string[] = [];
     if (config.flags.e2e) {
@@ -62,7 +64,7 @@ export class Testing implements d.Testing {
       compiler.build(),
       compiler.startDevServer(),
       startPuppeteerBrowser(config),
-      setupJestConfig(config, snapshotId),
+      setupJestConfig(config),
     ]);
 
     const results = startupResults[0];
@@ -76,7 +78,6 @@ export class Testing implements d.Testing {
     }
 
     if (this.devServer) {
-      const env: d.JestProcessEnv = process.env;
       env.__STENCIL_BROWSER_URL__ = this.devServer.browserUrl;
       config.logger.debug(`dev server url: ${env.__STENCIL_BROWSER_URL__}`);
 
@@ -84,11 +85,16 @@ export class Testing implements d.Testing {
       config.logger.debug(`dev server loader: ${env.__STENCIL_LOADER_SCRIPT_URL__}`);
     }
 
-    const screenshotData = await setupScreenshots(config, snapshotId);
+    let screenshotData: d.E2ESnapshot;
+    if (doScreenshots) {
+      screenshotData = await startE2ESnapshot(config);
+    }
 
     await runJest(config, this.jestConfigPath);
 
-    await teardownScreenshots(screenshotData);
+    if (doScreenshots) {
+      await completeE2EScreenshots(screenshotData);
+    }
 
     config.logger.info('');
   }
@@ -168,13 +174,4 @@ function getLoaderScriptUrl(config: d.Config, outputTarget: d.OutputTargetWww, b
   }
 
   return `${browserUrl}/${buildDir}/${getLoaderFileName(config)}`;
-}
-
-
-function createSnapshotId() {
-  return crypto.createHash('md5')
-               .update(Date.now().toString())
-               .digest('base64')
-               .replace(/\W/g, '')
-               .substr(0, 8);
 }

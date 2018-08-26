@@ -33,16 +33,10 @@ export function validateTesting(config: d.Config) {
     });
   }
 
-  if (typeof testing.screenshotAdapter !== 'string') {
-    testing.screenshotAdapter = path.join(
+  if (!Array.isArray(testing.screenshotAdapters)) {
+    testing.screenshotAdapters = [path.join(
       config.sys.compiler.packageDir, 'testing', 'screenshot.local.adapter.js'
-    );
-
-  } else if (!path.isAbsolute(testing.screenshotAdapter)) {
-    testing.setupTestFrameworkScriptFile = path.join(
-      config.configPath,
-      testing.screenshotAdapter
-    );
+    )];
   }
 
   if (typeof testing.setupTestFrameworkScriptFile !== 'string') {
