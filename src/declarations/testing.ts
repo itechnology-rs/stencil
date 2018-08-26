@@ -53,9 +53,6 @@ export interface TestingConfig {
 }
 
 
-export type ScreenshotAdapterPlugin = () => ScreenshotAdapter;
-
-
 export interface ScreenshotAdapter {
   setup?(screenshotData: ScreenshotSetupData): Promise<void>;
   commitScreenshot?(commitData: CommitScreenshotData): Promise<void>;

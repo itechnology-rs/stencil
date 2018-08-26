@@ -24,9 +24,7 @@ export async function setupScreenshots(config: d.Config, snapshotId: string) {
   };
 
   if (data.screenshotAdapter) {
-    const plugin: d.ScreenshotAdapterPlugin = require(data.screenshotAdapter);
-
-    const adapter = plugin();
+    const adapter: d.ScreenshotAdapter = require(data.screenshotAdapter);
 
     if (adapter && typeof adapter.setup === 'function') {
       await adapter.setup(data);
@@ -39,9 +37,7 @@ export async function setupScreenshots(config: d.Config, snapshotId: string) {
 
 export async function teardownScreenshots(data: d.ScreenshotSetupData) {
   if (data.screenshotAdapter) {
-    const plugin: d.ScreenshotAdapterPlugin = require(data.screenshotAdapter);
-
-    const adapter = plugin();
+    const adapter: d.ScreenshotAdapter = require(data.screenshotAdapter);
 
     if (adapter && typeof adapter.teardown === 'function') {
       await adapter.teardown(data);
@@ -51,9 +47,7 @@ export async function teardownScreenshots(data: d.ScreenshotSetupData) {
 
 
 export async function screenshot(page: pd.TestPage, screenshotAdapterPath: string, uniqueDescription: string, opts: d.TestScreenshotOptions = {}) {
-  const plugin: d.ScreenshotAdapterPlugin = require(screenshotAdapterPath);
-
-  const adapter = plugin();
+  const adapter: d.ScreenshotAdapter = require(screenshotAdapterPath);
 
   const buf = await page.screenshot(createPuppeteerScreenshopOptions(opts));
 
