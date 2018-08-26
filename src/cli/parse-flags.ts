@@ -152,7 +152,8 @@ const ARG_OPTS = {
     'config',
     'docs-json',
     'log-level',
-    'root'
+    'root',
+    'screenshot-adapter'
   ],
   alias: {
     'config': 'c',

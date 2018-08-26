@@ -14,13 +14,6 @@ export function validateTesting(config: d.Config) {
     testing.moduleFileExtensions = DEFAULT_MODULE_FILE_EXTENSIONS;
   }
 
-  if (!Array.isArray(testing.reporters)) {
-    testing.reporters = [
-      'default',
-      config.sys.path.join(config.sys.compiler.packageDir, 'testing', 'jest.reporter.js')
-    ];
-  }
-
   if (!Array.isArray(testing.testPathIgnorePatterns)) {
     testing.testPathIgnorePatterns = DEFAULT_IGNORE_PATTERNS.map(ignorePattern => {
       return config.sys.path.join(config.rootDir, ignorePattern);
@@ -31,12 +24,6 @@ export function validateTesting(config: d.Config) {
         testing.testPathIgnorePatterns.push(outputTarget.dir);
       }
     });
-  }
-
-  if (!Array.isArray(testing.screenshotAdapters)) {
-    testing.screenshotAdapters = [path.join(
-      config.sys.compiler.packageDir, 'testing', 'screenshot.local.adapter.js'
-    )];
   }
 
   if (typeof testing.setupTestFrameworkScriptFile !== 'string') {
@@ -96,6 +83,26 @@ export function validateTesting(config: d.Config) {
       testing.transform[DEFAULT_TS_TRANSFORM]
     );
   }
+
+  if (config.flags.e2e && config.flags.screenshot) {
+
+    if (typeof config.flags.screenshotAdapter === 'string') {
+      let screenshotAdapter = config.flags.screenshotAdapter;
+      if (!path.isAbsolute(screenshotAdapter)) {
+        screenshotAdapter = path.join(config.cwd, screenshotAdapter);
+      }
+      testing.screenshotAdapters = [screenshotAdapter];
+
+    } else if (!Array.isArray(testing.screenshotAdapters)) {
+      testing.screenshotAdapters = [path.join(
+        config.sys.compiler.packageDir, 'testing', 'screenshot.local.adapter.js'
+      )];
+    }
+
+  } else {
+    testing.screenshotAdapters = null;
+  }
+
 }
 
 const DEFAULT_TS_TRANSFORM = '^.+\\.(ts|tsx)$';

@@ -93,7 +93,7 @@ export class Testing implements d.Testing {
     await runJest(config, this.jestConfigPath);
 
     if (doScreenshots) {
-      await completeE2EScreenshots(screenshotData);
+      await completeE2EScreenshots(config, screenshotData);
     }
 
     config.logger.info('');

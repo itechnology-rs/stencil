@@ -284,6 +284,19 @@ describe('parseFlags', () => {
     expect(flags.root).toBe('custom-www');
   });
 
+  it('should parse --screenshot', () => {
+    process.argv[2] = '--screenshot';
+    const flags = parseFlags(process);
+    expect(flags.screenshot).toBe(true);
+  });
+
+  it('should parse --screenshot-adapter', () => {
+    process.argv[2] = '--screenshot-adapter';
+    process.argv[3] = 'some/adapter.js';
+    const flags = parseFlags(process);
+    expect(flags.screenshotAdapter).toBe('some/adapter.js');
+  });
+
   it('should parse --serve', () => {
     process.argv[2] = '--serve';
     const flags = parseFlags(process);
