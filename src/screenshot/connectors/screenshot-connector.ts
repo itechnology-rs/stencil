@@ -63,9 +63,11 @@ export class ScreenshotConnector implements d.ScreenshotConnector {
   }
 
   async updateAppData() {
+    const snapshots = await this.getAllSnapshotData();
+
     const appData: d.E2EApp = {
       masterSnapshotId: null,
-      snapshots: (await this.getAllSnapshotData())
+      snapshots: snapshots
     };
 
     appData.snapshots.sort((a, b) => {
@@ -84,7 +86,7 @@ export class ScreenshotConnector implements d.ScreenshotConnector {
 
     } catch (e) {}
 
-    if (!appData.masterSnapshotId && appData.snapshots.length > 1) {
+    if (!appData.masterSnapshotId && appData.snapshots.length > 0) {
       appData.masterSnapshotId = appData.snapshots[0].id;
     }
 
