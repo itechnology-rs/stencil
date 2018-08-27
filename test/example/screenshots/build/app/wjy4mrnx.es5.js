@@ -1,2 +1,0 @@
-/*! Built with http://stenciljs.com */
-App.loadBundle("wjy4mrnx",["exports"],function(e){var n=window.App.h,r=function(){function e(){}return e.prototype.render=function(){return n("main",null,"hello")},Object.defineProperty(e,"is",{get:function(){return"app-root"},enumerable:!0,configurable:!0}),Object.defineProperty(e,"style",{get:function(){return""},enumerable:!0,configurable:!0}),e}();e.AppRoot=r,Object.defineProperty(e,"__esModule",{value:!0})});

@@ -1,2 +1,0 @@
-/*! Built with http://stenciljs.com */
-const{h:n}=window.App;function o(n,o){return!!o.closest(n)}function e(n){return n?{"ion-color":!0,[`ion-color-${n}`]:!0}:null}function r(n,o){return{[o]:!0,[`${o}-${n}`]:!!n}}async function t(n,o,e,r){if(o&&"#"!==o[0]&&-1===o.indexOf("://")){const t=n.document.querySelector("ion-router");if(t)return e&&e.preventDefault(),await t.componentOnReady(),t.push(o,r)}return Promise.resolve()}export{r as a,e as b,t as c,o as d};
