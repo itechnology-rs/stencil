@@ -3,28 +3,28 @@
     "alwaysStrict": true,
     "allowSyntheticDefaultImports": true,
     "allowUnreachableCode": false,
-    "declaration": false,
+    "declaration": true,
     "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
     "lib": [
       "dom",
       "es2017"
     ],
-    "module": "commonjs",
+    "module": "es2015",
     "moduleResolution": "node",
     "noImplicitAny": true,
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "outDir": "../../../testing/transpiled-screenshot",
+    "outDir": "../../dist/transpiled-screenshot",
     "pretty": true,
-    "rootDir": "../../",
+    "rootDir": "../",
     "target": "es2015"
   },
   "include": [
-    "../../../types/*.d.ts"
+    "../../types/*.d.ts"
   ],
   "files": [
-    "./screenshot.local.adapter.ts"
+    "./index.ts"
   ]
 }

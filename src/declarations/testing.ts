@@ -45,7 +45,6 @@ export interface TestingConfig {
   moduleFileExtensions?: string[];
   reporters?: string[];
   setupTestFrameworkScriptFile?: string;
-  screenshotAdapters?: string[];
   testEnvironment?: string;
   testMatch?: string[];
   testPathIgnorePatterns?: string[];

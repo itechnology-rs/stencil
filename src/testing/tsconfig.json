@@ -25,7 +25,6 @@
     "../../types/*.d.ts"
   ],
   "files": [
-    "./index.ts",
-    "./screenshot/screenshot.local.adapter.ts"
+    "./index.ts"
   ]
 }

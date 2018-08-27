@@ -20,22 +20,17 @@ export async function startE2ESnapshot(config: d.Config) {
 
   env.__STENCIL_SCREENSHOT_IMAGES_DIR__ = imagesDir;
 
-  const dataDir = config.sys.path.join(tmpDir, 'stencil-e2e-data');
+  const dataDir = config.sys.path.join(tmpDir, `stencil-e2e-${snapshotId}`);
   try {
     await config.sys.fs.mkdir(dataDir);
   } catch (e) {}
 
-  const snapshotDataDir = config.sys.path.join(dataDir, snapshotId);
-  try {
-    await config.sys.fs.mkdir(snapshotDataDir);
-  } catch (e) {}
-
-  env.__STENCIL_SCREENSHOT_DATA_DIR__ = snapshotDataDir;
+  env.__STENCIL_SCREENSHOT_DATA_DIR__ = dataDir;
 
   const snapshot: d.E2ESnapshot = {
     id: snapshotId,
     imagesDir: imagesDir,
-    dataDir: snapshotDataDir,
+    dataDir: dataDir,
     timestamp: Date.now()
   };
 
@@ -78,20 +73,14 @@ export async function writeE2EScreenshot(screenshot: Buffer, uniqueDescription: 
 
 
 export async function completeE2EScreenshots(config: d.Config, results: d.E2ESnapshot) {
-  const screenshotAdapters = config.testing.screenshotAdapters;
-  if (!Array.isArray(screenshotAdapters)) {
+  const screenshotConnector = config.screenshot.screenshotConnector;
+  if (!screenshotConnector) {
     return;
   }
 
   const snapshot = await consolidateData(config, results);
 
-  for (let i = 0; i < screenshotAdapters.length; i++) {
-    const screenshotAdapter = screenshotAdapters[i];
-
-    if (typeof screenshotAdapter === 'string') {
-      await runScreenshotAdapter(screenshotAdapter, JSON.parse(JSON.stringify(snapshot)));
-    }
-  }
+  await runScreenshotScreenshotConnector(config, screenshotConnector, snapshot);
 }
 
 
@@ -100,6 +89,8 @@ async function consolidateData(config: d.Config, results: d.E2ESnapshot) {
 
   const snapshot: d.E2ESnapshot = {
     id: results.id,
+    rootDir: config.rootDir,
+    packageDir: config.sys.compiler.packageDir,
     imagesDir: results.imagesDir,
     timestamp: results.timestamp,
     screenshots: []
@@ -133,12 +124,23 @@ async function consolidateData(config: d.Config, results: d.E2ESnapshot) {
 }
 
 
-async function runScreenshotAdapter(screenshotAdapter: string, snapshot: d.E2ESnapshot) {
-  const ScreenAdapter = require(screenshotAdapter);
+async function runScreenshotScreenshotConnector(config: d.Config, screenshotConnector: string, snapshot: d.E2ESnapshot) {
+  try {
+    const ScreenshotConnector = require(screenshotConnector);
 
-  const adapter: d.ScreenshotAdaptor = new ScreenAdapter();
+    const connector: d.ScreenshotConnector = new ScreenshotConnector();
 
-  await adapter.generate(snapshot);
+    if (typeof connector.generate === 'function') {
+      const timespan = config.logger.createTimeSpan(`update screenshot data started`);
+
+      await connector.generate(snapshot);
+
+      timespan.finish(`updating screenshot data finished`);
+    }
+
+  } catch (e) {
+    config.logger.error(`error running screenshot connector: ${screenshotConnector}, ${e}`);
+  }
 }
 
 
@@ -162,9 +164,7 @@ function createTestId(uniqueDescription: string) {
 
 function fileExists(filePath: string) {
   return new Promise<boolean>(resolve => {
-    fs.access(filePath, (err: any) => {
-      resolve(!err);
-    });
+    fs.access(filePath, (err: any) => resolve(!err));
   });
 }
 

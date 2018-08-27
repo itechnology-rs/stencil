@@ -22,6 +22,7 @@ node_modules/
 /polyfills
 /server
 /sys
+/screenshot
 /testing
 
 test/e2e/app/components.d.ts

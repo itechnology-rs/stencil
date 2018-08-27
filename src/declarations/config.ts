@@ -124,6 +124,7 @@ export interface StencilConfig {
   minifyCss?: boolean;
   minifyJs?: boolean;
   preamble?: string;
+  screenshot?: d.ScreenshotConfig;
   srcIndexHtml?: string;
   sys?: d.StencilSystem;
   testing?: d.TestingConfig;
@@ -204,7 +205,7 @@ export interface ConfigFlags {
   prod?: boolean;
   root?: string;
   screenshot?: boolean;
-  screenshotAdapter?: string;
+  screenshotConnector?: string;
   serve?: boolean;
   serviceWorker?: boolean;
   spec?: boolean;

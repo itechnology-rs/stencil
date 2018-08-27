@@ -8,6 +8,7 @@ import { validateOutputTargets } from './validate-outputs';
 import { validatePaths } from './validate-paths';
 import { validatePlugins } from './validate-plugins';
 import { validateRollupConfig } from './validate-rollup-config';
+import { validateScreenshot } from './validate-screenshot';
 import { validateTesting } from './validate-testing';
 import { validateWorkers } from './validate-workers';
 import { _deprecatedValidateConfigCollections } from './_deprecated-validate-config-collection';
@@ -139,7 +140,7 @@ export function validateConfig(config: d.Config, setEnvVariables?: boolean) {
   }
 
   validateRollupConfig(config);
-
+  validateScreenshot(config);
   validateTesting(config);
 
   return config;

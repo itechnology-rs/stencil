@@ -1,5 +1,5 @@
 import * as d from '../declarations';
-import { completeE2EScreenshots, startE2ESnapshot } from './screenshot/screenshot-handler';
+import { completeE2EScreenshots, startE2ESnapshot } from '../screenshot/generator/data-generator';
 import { getLoaderFileName } from '../compiler/app/app-file-naming';
 import { hasError, normalizePath } from '../compiler/util';
 import { runJest, setupJestConfig } from './jest/jest-runner';
@@ -46,11 +46,6 @@ export class Testing implements d.Testing {
       return;
     }
 
-    const doScreenshots = !!(config.flags.e2e && config.flags.screenshot && config.testing.screenshotAdapters);
-    if (doScreenshots) {
-      env.__STENCIL_E2E_SCREENSHOTS__ = 'true';
-    }
-
     const msg: string[] = [];
     if (config.flags.e2e) {
       msg.push('e2e');
@@ -59,6 +54,12 @@ export class Testing implements d.Testing {
       msg.push('spec');
     }
     config.logger.info(config.logger.magenta(`testing ${msg.join(' and ')} files`));
+
+    const doScreenshots = !!(config.flags.e2e && config.flags.screenshot && config.screenshot.screenshotConnector);
+    if (doScreenshots) {
+      env.__STENCIL_E2E_SCREENSHOTS__ = 'true';
+      config.logger.info(config.logger.magenta(`generating screenshots`));
+    }
 
     const startupResults = await Promise.all([
       compiler.build(),

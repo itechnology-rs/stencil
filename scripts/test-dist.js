@@ -56,6 +56,12 @@ function testPackage(testPkg) {
     ]
   },
   {
+    packageJson: '../screenshot/package.json',
+    exports: [
+      'ScreenshotConnector'
+    ]
+  },
+  {
     packageJson: '../server/package.json',
     exports: [
       'h',

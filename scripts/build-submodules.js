@@ -10,6 +10,7 @@ const SUBMODULES = [
   'compiler',
   'server',
   'sys/node',
+  'screenshot',
   'testing'
 ];
 

@@ -2,7 +2,7 @@ const fs = require('fs-extra');
 const path = require('path');
 const rollup = require('rollup');
 const rollupResolve = require('rollup-plugin-node-resolve');
-const rollupCommonjs = require('rollup-plugin-commonjs')
+const rollupCommonjs = require('rollup-plugin-commonjs');
 const transpile = require('./transpile');
 const { getDefaultBuildConditionals, rollupPluginReplace } = require('../dist/transpiled-build-conditionals/build-conditionals');
 
@@ -79,21 +79,7 @@ if (success) {
     });
   }
 
-  function buildScreenshotTools() {
-    const success = transpile(path.join(__dirname, '..', 'src', 'testing', 'screenshot', 'tsconfig.json'))
-    if (success) {
-      const src = path.join(__dirname, '..', 'testing', 'transpiled-screenshot', 'testing', 'screenshot');
-      const dst = path.join(__dirname, '..', 'testing');
-      fs.copySync(src, dst);
-
-      const rmv = path.join(__dirname, '..', 'testing', 'transpiled-screenshot');
-      fs.removeSync(rmv);
-    }
-  }
-
   bundleTestingUtils();
-  buildScreenshotTools();
-
 
   process.on('exit', () => {
     fs.removeSync(TRANSPILED_DIR);

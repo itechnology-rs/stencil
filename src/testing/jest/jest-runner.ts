@@ -33,7 +33,6 @@ export async function setupJestConfig(config: d.Config) {
   config.logger.debug(`jest config: ${jestConfigPath}`);
 
   const jestConfig = Object.assign({}, config.testing);
-  delete jestConfig.screenshotAdapters;
 
   await config.sys.fs.writeFile(
     jestConfigPath,

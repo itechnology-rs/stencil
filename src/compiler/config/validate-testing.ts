@@ -84,25 +84,6 @@ export function validateTesting(config: d.Config) {
     );
   }
 
-  if (config.flags.e2e && config.flags.screenshot) {
-
-    if (typeof config.flags.screenshotAdapter === 'string') {
-      let screenshotAdapter = config.flags.screenshotAdapter;
-      if (!path.isAbsolute(screenshotAdapter)) {
-        screenshotAdapter = path.join(config.cwd, screenshotAdapter);
-      }
-      testing.screenshotAdapters = [screenshotAdapter];
-
-    } else if (!Array.isArray(testing.screenshotAdapters)) {
-      testing.screenshotAdapters = [path.join(
-        config.sys.compiler.packageDir, 'testing', 'screenshot.local.adapter.js'
-      )];
-    }
-
-  } else {
-    testing.screenshotAdapters = null;
-  }
-
 }
 
 const DEFAULT_TS_TRANSFORM = '^.+\\.(ts|tsx)$';
