@@ -27,4 +27,4 @@ node_modules/
 
 test/e2e/app/components.d.ts
 
-test/jest/www/*
+test/example/www/*
