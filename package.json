@@ -12,6 +12,7 @@
     "compiler/",
     "dist/",
     "polyfills/",
+    "screenshot/",
     "server/",
     "sys/",
     "testing/"

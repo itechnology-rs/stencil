@@ -107,6 +107,7 @@ function testPackage(testPkg) {
       "bin/",
       "dist/",
       "compiler/",
+      "screenshot/",
       "server/",
       "sys/",
       "testing/"
