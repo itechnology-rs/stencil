@@ -5,6 +5,7 @@ import { GENERATED_DTS, getComponentsDtsSrcFilePath } from '../distribution/dist
 import { MEMBER_TYPE } from '../../util/constants';
 import { normalizePath } from '../util';
 import { CompilerUpgrade, validateCollectionCompatibility } from '../collections/collection-compatibility';
+import { updateStencilTypesImports } from '../distribution/stencil-types';
 
 export async function generateComponentTypes(config: d.Config, compilerCtx: d.CompilerCtx, buildCtx: d.BuildCtx, destination = 'src') {
   // only gather components that are still root ts files we've found and have component metadata
@@ -32,6 +33,7 @@ export async function generateComponentTypes(config: d.Config, compilerCtx: d.Co
 
   if (destination !== 'src') {
     componentsDtsFilePath = config.sys.path.resolve(destination, GENERATED_DTS);
+    componentTypesFileContent = updateStencilTypesImports(config, destination, componentsDtsFilePath, componentTypesFileContent);
   }
 
   await compilerCtx.fs.writeFile(componentsDtsFilePath, componentTypesFileContent, { immediateWrite: true });
@@ -51,7 +53,7 @@ async function generateComponentTypesFile(config: d.Config, compilerCtx: d.Compi
 
   const collectionTypesImports = await getCollectionsTypeImports(config, compilerCtx, defineGlobalIntrinsicElements);
   const collectionTypesImportsString = collectionTypesImports.map((cti) => {
-    return `import '${cti.pkgName}'`;
+    return `import '${cti.pkgName}';`;
   })
   .join('\n');
 
@@ -122,7 +124,7 @@ ${typeData.sort(sortImportNames).map(td => {
  */
 /* tslint:disable */
 
-${defineGlobalIntrinsicElements ? `import '@stencil/core';` : `import './stencil.core';`}
+import '@stencil/core';
 
 ${collectionTypesImportsString}
 ${typeImportString}
