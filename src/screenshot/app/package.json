@@ -7,7 +7,8 @@
     "dist/"
   ],
   "scripts": {
-    "build": "stencil build",
+    "build": "stencil build && npm run remove.svgs",
+    "remove.svgs": "rimraf ../../../screenshot/app/build/app/svg",
     "start": "stencil build --dev --watch --serve",
     "test": "jest",
     "test.watch": "jest --watch"
@@ -15,6 +16,9 @@
   "dependencies": {
     "@ionic/core": "4.0.0-beta.3",
     "@stencil/core": "0.11.4"
+  },
+  "devDependencies": {
+    "rimraf": "^2.6.2"
   },
   "repository": {
     "type": "git",

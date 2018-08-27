@@ -9,6 +9,7 @@ export class ScreenshotConnector implements d.ScreenshotConnector {
   appDataFileName = 'app-data.json';
   imagesDirName = 'images';
   snapshotDataDirName = 'snapshots';
+  addGitIgnore = true;
 
   results: d.E2ESnapshot;
   appDir: string;
@@ -20,14 +21,10 @@ export class ScreenshotConnector implements d.ScreenshotConnector {
     this.results = results;
 
     await this.createWebAppStructure();
-
     await this.updateImages();
     await this.updateSnapshotData();
-
-    await Promise.all([
-      this.updateAppData(),
-      this.updateWebApp()
-    ]);
+    await this.updateAppData();
+    await this.updateWebApp();
   }
 
   async updateImages() {
@@ -160,6 +157,11 @@ export class ScreenshotConnector implements d.ScreenshotConnector {
     await this.copyDir(webappSrcDirPath, webappDestDirPath);
 
     await this.writeFile(webappDestBuildVersionPath, this.results.compilerVersion);
+
+    if (this.addGitIgnore) {
+      const gitIgnoreFilePath = path.join(webappDestDirPath, '.gitignore');
+      await this.writeFile(gitIgnoreFilePath, '*');
+    }
   }
 
   async createWebAppStructure() {
