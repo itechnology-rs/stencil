@@ -5,6 +5,7 @@ export interface ScreenshotConfig {
 
 
 export interface E2EApp {
+  masterSnapshotId: string;
   snapshots: E2ESnapshot[];
 }
 
@@ -19,6 +20,7 @@ export interface E2ESnapshot {
   packageDir?: string;
   timestamp: number;
   screenshots?: E2EScreenshot[];
+  compilerVersion?: string;
 }
 
 

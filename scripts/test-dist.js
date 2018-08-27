@@ -57,6 +57,10 @@ function testPackage(testPkg) {
   },
   {
     packageJson: '../screenshot/package.json',
+    files: [
+      'app/',
+      'screenshot.connector.default.js'
+    ],
     exports: [
       'ScreenshotConnector'
     ]
@@ -77,8 +81,7 @@ function testPackage(testPkg) {
       'jest.environment.js',
       'jest.preprocessor.js',
       'jest.preset.js',
-      'jest.setuptest.js',
-      'screenshot.local.adapter.js'
+      'jest.setuptest.js'
     ],
     exports: [
       'JestEnvironment',
