@@ -23,12 +23,15 @@ export interface JestEnvironmentGlobal {
 }
 
 
-export interface JestProcessEnv {
+export interface E2EProcessEnv {
+  STENCIL_SNAPSHOT_ID?: string;
+  STENCIL_SNAPSHOT_DESC?: string;
+  STENCIL_SNAPSHOT_COMMIT_URL?: string;
+
   __STENCIL_BROWSER_URL__?: string;
   __STENCIL_LOADER_SCRIPT_URL__?: string;
   __STENCIL_BROWSER_WS_ENDPOINT__?: string;
-  __STENCIL_E2E_SNAPSHOT_ID__?: string;
-  __STENCIL_E2E_SCREENSHOTS__?: 'true';
+  __STENCIL_SCREENSHOTS__?: 'true';
   __STENCIL_SCREENSHOT_IMAGES_DIR__?: string;
   __STENCIL_SCREENSHOT_DATA_DIR__?: string;
 }

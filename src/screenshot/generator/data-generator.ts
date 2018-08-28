@@ -5,11 +5,10 @@ import * as path from 'path';
 
 
 export async function startE2ESnapshot(config: d.Config) {
-  const env = (process.env) as d.JestProcessEnv;
+  const env = (process.env) as d.E2EProcessEnv;
 
-  const snapshotId = createSnapshotId();
+  const snapshotId = getSnapshotId();
   config.logger.debug(`test e2e snapshot id: ${snapshotId}`);
-  env.__STENCIL_E2E_SNAPSHOT_ID__ = snapshotId;
 
   const tmpDir = config.sys.details.tmpDir;
 
@@ -34,6 +33,8 @@ export async function startE2ESnapshot(config: d.Config) {
 
   const snapshot: d.E2ESnapshot = {
     id: snapshotId,
+    desc: env.STENCIL_SNAPSHOT_DESC || '',
+    commitUrl: env.STENCIL_SNAPSHOT_COMMIT_URL || '',
     imagesDir: imagesDir,
     dataDir: dataDir,
     timestamp: Date.now()
@@ -44,7 +45,7 @@ export async function startE2ESnapshot(config: d.Config) {
 
 
 export async function writeE2EScreenshot(screenshot: Buffer, uniqueDescription: string) {
-  const env = (process.env) as d.JestProcessEnv;
+  const env = (process.env) as d.E2EProcessEnv;
 
   const hash = crypto.createHash('md5')
                      .update(screenshot)
@@ -62,7 +63,7 @@ export async function writeE2EScreenshot(screenshot: Buffer, uniqueDescription: 
     await writeFile(imagePath, screenshot);
   }
 
-  const id = createTestId(uniqueDescription);
+  const id = getTestId(uniqueDescription);
   const dataName = `${id}.json`;
   const dataPath = path.join(env.__STENCIL_SCREENSHOT_DATA_DIR__, dataName);
 
@@ -78,14 +79,16 @@ export async function writeE2EScreenshot(screenshot: Buffer, uniqueDescription: 
 
 
 export async function completeE2EScreenshots(config: d.Config, results: d.E2ESnapshot) {
-  const screenshotConnector = config.screenshot.screenshotConnector;
-  if (!screenshotConnector) {
-    return;
+  let connectorModulePath = process.env.STENCIL_SCREENSHOT_CONNECTOR;
+  if (typeof connectorModulePath !== 'string' || !connectorModulePath) {
+    connectorModulePath = config.sys.path.join(
+      config.sys.compiler.packageDir, 'screenshot', 'screenshot.connector.default.js'
+    );
   }
 
   const snapshot = await consolidateData(config, results);
 
-  await runScreenshotScreenshotConnector(config, screenshotConnector, snapshot);
+  await runScreenshotScreenshotConnector(config, connectorModulePath, snapshot);
 }
 
 
@@ -94,7 +97,7 @@ async function consolidateData(config: d.Config, results: d.E2ESnapshot) {
 
   const snapshot: d.E2ESnapshot = {
     id: results.id,
-    rootDir: config.rootDir,
+    appRootDir: config.rootDir,
     packageDir: config.sys.compiler.packageDir,
     imagesDir: results.imagesDir,
     dataDir: results.dataDir,
@@ -135,9 +138,9 @@ async function consolidateData(config: d.Config, results: d.E2ESnapshot) {
 }
 
 
-async function runScreenshotScreenshotConnector(config: d.Config, screenshotConnector: string, snapshot: d.E2ESnapshot) {
+async function runScreenshotScreenshotConnector(config: d.Config, connectorModulePath: string, snapshot: d.E2ESnapshot) {
   try {
-    const ScreenshotConnector = require(screenshotConnector);
+    const ScreenshotConnector = require(connectorModulePath);
 
     const connector: d.ScreenshotConnector = new ScreenshotConnector();
 
@@ -150,26 +153,35 @@ async function runScreenshotScreenshotConnector(config: d.Config, screenshotConn
     }
 
   } catch (e) {
-    config.logger.error(`error running screenshot connector: ${screenshotConnector}, ${e}`);
+    config.logger.error(`error running screenshot connector: ${connectorModulePath}, ${e}`);
   }
 }
 
 
-function createSnapshotId() {
-  return crypto.createHash('md5')
-               .update(Date.now().toString())
-               .digest('base64')
-               .replace(/\W/g, '')
-               .substr(0, 8);
+function getSnapshotId() {
+  let snapshotId = process.env.STENCIL_SNAPSHOT_ID;
+  if (typeof snapshotId === 'string' && snapshotId.length > 7) {
+    return snapshotId;
+  }
+
+  snapshotId = crypto.createHash('md5')
+                     .update(Date.now().toString())
+                     .digest('hex')
+                     .substr(0, 8)
+                     .toLowerCase();
+
+  process.env.STENCIL_SNAPSHOT_ID = snapshotId;
+
+  return snapshotId;
 }
 
 
-function createTestId(uniqueDescription: string) {
+function getTestId(uniqueDescription: string) {
   return crypto.createHash('md5')
                .update(uniqueDescription)
-               .digest('base64')
-               .replace(/\W/g, '')
-               .substr(0, 8);
+               .digest('hex')
+               .substr(0, 8)
+               .toLowerCase();
 }
 
 

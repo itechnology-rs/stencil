@@ -5,7 +5,7 @@ import * as puppeteer from 'puppeteer';
 
 
 export function initTestPageScreenshot(page: pd.TestPage) {
-  if ((process.env as d.JestProcessEnv).__STENCIL_E2E_SCREENSHOTS__ === 'true') {
+  if ((process.env as d.E2EProcessEnv).__STENCIL_SCREENSHOTS__ === 'true') {
     page.e2eScreenshot = screenshot.bind(page, page);
 
   } else {

@@ -4,27 +4,58 @@ import * as path from 'path';
 
 
 export class ScreenshotConnector implements d.ScreenshotConnector {
-  appDirName = 'screenshots';
-  appDataDirName = 'data';
-  appDataFileName = 'app-data.json';
+  rootDirName = 'screenshots';
+  dataDirName = 'data';
+  appDataFileName = 'data.json';
   imagesDirName = 'images';
   snapshotDataDirName = 'snapshots';
   addGitIgnore = true;
 
   results: d.E2ESnapshot;
-  appDir: string;
-  appDataDir: string;
+  rootDir: string;
+  dataDir: string;
   imagesDir: string;
   snapshotDataDir: string;
 
   async generate(results: d.E2ESnapshot) {
     this.results = results;
 
-    await this.createWebAppStructure();
+    await this.createDirs();
     await this.updateImages();
     await this.updateSnapshotData();
-    await this.updateAppData();
-    await this.updateWebApp();
+    await this.updateData();
+  }
+
+  async createDirs() {
+    await this.createRootDir();
+    await this.createDataDir();
+    await this.createImagesDir();
+    await this.createSnapshotDataDir();
+  }
+
+  async createRootDir() {
+    this.rootDir = path.join(this.results.appRootDir, this.rootDirName);
+    await this.mkDir(this.rootDir);
+
+    if (this.addGitIgnore) {
+      const gitIgnoreFilePath = path.join(this.rootDir, '.gitignore');
+      await this.writeFile(gitIgnoreFilePath, '*');
+    }
+  }
+
+  async createDataDir() {
+    this.dataDir = path.join(this.rootDir, this.dataDirName);
+    await this.mkDir(this.dataDir);
+  }
+
+  async createSnapshotDataDir() {
+    this.snapshotDataDir = path.join(this.dataDir, this.snapshotDataDirName);
+    await this.mkDir(this.snapshotDataDir);
+  }
+
+  async createImagesDir() {
+    this.imagesDir = path.join(this.rootDir, this.imagesDirName);
+    await this.mkDir(this.imagesDir);
   }
 
   async updateImages() {
@@ -62,12 +93,21 @@ export class ScreenshotConnector implements d.ScreenshotConnector {
     await this.writeFile(snapshotJsonFilePath, JSON.stringify(snapshotData));
   }
 
-  async updateAppData() {
+  async updateData() {
     const snapshots = await this.getAllSnapshotData();
 
-    const appData: d.E2EApp = {
+    const appData: d.E2EData = {
+      appName: this.results.appName,
       masterSnapshotId: null,
-      snapshots: snapshots
+      snapshots: snapshots.map(snapshot => {
+        const abbrSnapshotData: d.E2ESnapshot = {
+          id: snapshot.id,
+          desc: snapshot.desc || '',
+          commitUrl: snapshot.commitUrl || '',
+          timestamp: snapshot.timestamp
+        };
+        return abbrSnapshotData
+      })
     };
 
     appData.snapshots.sort((a, b) => {
@@ -76,11 +116,11 @@ export class ScreenshotConnector implements d.ScreenshotConnector {
       return 0;
     });
 
-    const appDataJsonFilePath = path.join(this.appDataDir, this.appDataFileName);
+    const appDataJsonFilePath = path.join(this.dataDir, this.appDataFileName);
 
     try {
       const previousAppDataContent = await this.readFile(appDataJsonFilePath);
-      const previousAppData = JSON.parse(previousAppDataContent) as d.E2EApp;
+      const previousAppData = JSON.parse(previousAppDataContent) as d.E2EData;
 
       appData.masterSnapshotId = previousAppData.masterSnapshotId;
 
@@ -91,6 +131,16 @@ export class ScreenshotConnector implements d.ScreenshotConnector {
     }
 
     await this.writeFile(appDataJsonFilePath, JSON.stringify(appData));
+  }
+
+  async getAllSnapshotData() {
+    const snapshotJsonFileNames = await this.getSnapshotFileNames();
+
+    const snapshots = snapshotJsonFileNames.map(async snapshotJsonFileName => {
+      return await this.getSnapshotData(snapshotJsonFileName);
+    });
+
+    return Promise.all(snapshots);
   }
 
   async getSnapshotFileNames() {
@@ -117,81 +167,6 @@ export class ScreenshotConnector implements d.ScreenshotConnector {
     return parsedData;
   }
 
-  async getAllSnapshotData() {
-    const snapshotJsonFileNames = await this.getSnapshotFileNames();
-
-    const snapshots = snapshotJsonFileNames.map(async snapshotJsonFileName => {
-      const parsedData = await this.getSnapshotData(snapshotJsonFileName);
-
-      const snapshotData: d.E2ESnapshot = {
-        id: parsedData.id,
-        desc: parsedData.desc || '',
-        commitUrl: parsedData.commitUrl || '',
-        timestamp: parsedData.timestamp
-      };
-
-      return snapshotData
-    });
-
-    return Promise.all(snapshots);
-  }
-
-  async updateWebApp() {
-    const webappDestDirPath = this.appDir;
-    const webappDestBuildDirPath = path.join(webappDestDirPath, 'build');
-
-    const webappDestBuildVersionPath = path.join(webappDestBuildDirPath, `app.version.txt`);
-
-    try {
-      const appVersion = await this.readFile(webappDestBuildVersionPath);
-      if (appVersion === this.results.compilerVersion) {
-        return;
-      }
-    } catch (e) {}
-
-    const buildDirExists = await this.hasAccess(webappDestBuildDirPath)
-    if (buildDirExists) {
-      await this.deleteDirRecursive(webappDestBuildDirPath);
-    }
-
-    const webappSrcDirPath = path.join(this.results.packageDir, 'screenshot', 'app');
-
-    await this.copyDir(webappSrcDirPath, webappDestDirPath);
-
-    await this.writeFile(webappDestBuildVersionPath, this.results.compilerVersion);
-
-    if (this.addGitIgnore) {
-      const gitIgnoreFilePath = path.join(webappDestDirPath, '.gitignore');
-      await this.writeFile(gitIgnoreFilePath, '*');
-    }
-  }
-
-  async createWebAppStructure() {
-    await this.createAppDir();
-    await this.createAppDataDir();
-    await this.createImagesDataDir();
-    await this.createSnapshotDataDir();
-  }
-
-  async createAppDir() {
-    this.appDir = path.join(this.results.rootDir, this.appDirName);
-    await this.mkDir(this.appDir);
-  }
-
-  async createAppDataDir() {
-    this.appDataDir = path.join(this.appDir, this.appDataDirName);
-    await this.mkDir(this.appDataDir);
-  }
-
-  async createSnapshotDataDir() {
-    this.snapshotDataDir = path.join(this.appDataDir, this.snapshotDataDirName);
-    await this.mkDir(this.snapshotDataDir);
-  }
-
-  async createImagesDataDir() {
-    this.imagesDir = path.join(this.appDir, this.imagesDirName);
-    await this.mkDir(this.imagesDir);
-  }
 
   readDir(dirPath: string) {
     return readDir(dirPath);
@@ -283,7 +258,6 @@ async function readDir(dirPath: string) {
   });
 }
 
-
 async function hasAccess(filePath: string) {
   return new Promise<boolean>(resolve => {
     fs.access(filePath, (err: any) => resolve(!err));
@@ -343,30 +317,18 @@ async function stat(itemPath: string) {
 
 async function mkDir(dirPath: string) {
   return new Promise<void>(resolve => {
-    fs.mkdir(dirPath, () => {
-      resolve();
-    });
+    fs.mkdir(dirPath, () => resolve());
   });
 }
 
 async function deleteFile(filePath: string) {
   return new Promise<void>(resolve => {
-    fs.unlink(filePath, err => {
-      if (err) {
-        console.log('deleteFile', err);
-      }
-      resolve();
-    });
+    fs.unlink(filePath, () => resolve());
   });
 }
 
 async function deleteDir(dirPath: string) {
   return new Promise<void>(resolve => {
-    fs.rmdir(dirPath, err => {
-      if (err) {
-        console.log('deleteDir', err);
-      }
-      resolve();
-    });
+    fs.rmdir(dirPath, () => resolve());
   });
 }

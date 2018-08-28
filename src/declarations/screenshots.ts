@@ -1,10 +1,11 @@
 
 export interface ScreenshotConfig {
-  screenshotConnector?: string;
+
 }
 
 
-export interface E2EApp {
+export interface E2EData {
+  appName: string;
   masterSnapshotId: string;
   snapshots: E2ESnapshot[];
 }
@@ -16,11 +17,12 @@ export interface E2ESnapshot {
   commitUrl?: string;
   imagesDir?: string;
   dataDir?: string;
-  rootDir?: string;
+  appRootDir?: string;
   packageDir?: string;
   timestamp: number;
   screenshots?: E2EScreenshot[];
   compilerVersion?: string;
+  appName?: string;
 }
 
 

@@ -51,7 +51,7 @@ async function gotoTest(page: pd.TestPage, url: string) {
     throw new Error('gotoTest() url must start with /');
   }
 
-  const browserUrl = (process.env as d.JestProcessEnv).__STENCIL_BROWSER_URL__;
+  const browserUrl = (process.env as d.E2EProcessEnv).__STENCIL_BROWSER_URL__;
   if (typeof browserUrl !== 'string') {
     throw new Error('invalid gotoTest() browser url');
   }
@@ -74,7 +74,7 @@ async function setTestContent(page: pd.TestPage, html: string) {
     throw new Error('invalid setTestContent() html');
   }
 
-  const loaderUrl = (process.env as d.JestProcessEnv).__STENCIL_LOADER_SCRIPT_URL__;
+  const loaderUrl = (process.env as d.E2EProcessEnv).__STENCIL_LOADER_SCRIPT_URL__;
   if (typeof loaderUrl !== 'string') {
     throw new Error('invalid setTestContent() loader script url');
   }

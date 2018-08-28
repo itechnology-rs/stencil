@@ -37,7 +37,7 @@ export class Testing implements d.Testing {
       return;
     }
 
-    const env: d.JestProcessEnv = process.env;
+    const env: d.E2EProcessEnv = process.env;
     const compiler = this.compiler;
     const config = this.config;
     const { isValid, outputTarget } = getOutputTarget(config);
@@ -55,9 +55,9 @@ export class Testing implements d.Testing {
     }
     config.logger.info(config.logger.magenta(`testing ${msg.join(' and ')} files`));
 
-    const doScreenshots = !!(config.flags.e2e && config.flags.screenshot && config.screenshot.screenshotConnector);
+    let doScreenshots = !!(config.flags.e2e && config.flags.screenshot)
     if (doScreenshots) {
-      env.__STENCIL_E2E_SCREENSHOTS__ = 'true';
+      env.__STENCIL_SCREENSHOTS__ = 'true';
       config.logger.info(config.logger.magenta(`generating screenshots`));
     }
 
